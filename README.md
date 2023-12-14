@@ -33,11 +33,11 @@ library(ggplot2)
 
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% readRDS(.)
-sce <- runMap2SP(sp.obj, sc.obj, ctype = "subclass", res = 0.8, group.size = 30)
+sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30)
 
 ```
 
-# Set parameters
+## Set parameters
 |**Parameters**|**Description**                      |
 |----------|-----------------------------------------|
 |sp.obj     |Seurat object of spatial transcriptome (ST) data.|
