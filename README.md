@@ -1,6 +1,5 @@
 # Cell2Spatial
-Cell2Spatial is a sophisticated tool designed to decode spatial transcriptomic spots at the individual cell level. It aligns single-cell data with spatial coordinates. It's crucial that the single-cell and spatial transcriptomic data match in tissue origin or major cell type representation to ensure accurate alignment, maximizing the tool's practical applications.
-
+Cell2Spatial is a sophisticated tool specifically designed for decoding spatial transcriptomic spots at the individual cell level. Ensuring accurate alignment and maximizing practical applications necessitates a match in tissue origin or major cell type representation between single-cell and spatial transcriptomic data.
 <p align="center">
 	<img src="vignette_files/overview.png" alt="Resized Image" width="800">
 </p>
