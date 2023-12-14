@@ -37,7 +37,7 @@ sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30
 
 ```
 
-## Set parameters
+## 4. Setting parameters
 |**Parameters**|**Description**                      |
 |----------|-----------------------------------------|
 |sp.obj     |Seurat object of spatial transcriptome (ST) data.|
