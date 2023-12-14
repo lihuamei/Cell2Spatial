@@ -20,7 +20,7 @@ The Cell2Spatial's code comprises both R and Python components, necessitating es
 ## 2. Installation
 ``` r
 library(devtools)
-install_github("lihuamei/Cell2spatial")
+install_github("lihuamei/Cell2Spatial")
 
 ```
 ## 3. Loading the packages and datasets (scRNA-seq and ST data)
