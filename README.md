@@ -35,9 +35,9 @@ sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% re
 sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30, fix.cells.in.spot = 10)
 
 ```
-<p align="center">
-	<img src="vignette_files/mapping_results.png" alt="Results Image" width="800">
-</p>
+
+<img src="vignette_files/mapping_results.png" alt="Results Image" width="800">
+
 
 ### 4. Visualization of mapping results.
 ```
