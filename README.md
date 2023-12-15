@@ -49,7 +49,9 @@ gp2 <- DimPlot(sc.obj, label = TRUE, cols = cell.colors) + theme_dr(xlength = 0.
 gp1 + gp2
 
 ```
-
+<p align="center">
+	<img src="vignette_files/mapping_results.png" alt="Resized Image" width="800">
+</p>
 
 
 ## 5. Setting parameters
