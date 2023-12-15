@@ -36,9 +36,6 @@ sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30
 
 ```
 
-<img src="vignette_files/mapping_results.png" alt="Results Image" width="800">
-
-
 ### 4. Visualization of mapping results.
 ```
 sc.obj <- SCTransform(sc.obj, ncells = 3000, verbose = FALSE) %>%
