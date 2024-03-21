@@ -36,11 +36,16 @@ library(tidydr)
 
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% readRDS(.)
+
+```
+
+## 4. Assigning single-cells to spatial coordinates.
+```r
 sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30, fix.cells.in.spot = 10)
 
 ```
 
-### 4. Visualization of mapping results.
+### 5. Visualization of mapping results.
 ```
 sc.obj <- SCTransform(sc.obj, ncells = 3000, verbose = FALSE) %>%
     RunPCA(verbose = FALSE) %>%
@@ -55,7 +60,7 @@ gp1 + gp2
 	<img src="vignette_files/mapping_results.png" alt="Resized Image" width="800">
 </p>
 
-## 5. Setting parameters
+## 6. Setting parameters
 |**Parameters**|**Description**                      |
 |----------|-----------------------------------------|
 |sp.obj	|Seurat object of spatial transcriptome (ST) data.|
@@ -79,7 +84,7 @@ gp1 + gp2
 |n.wrokers	|Number of cores for parallel processing. Default: 4.|
 |verbose	|Show running messages or not. Default: TRUE.|
 
-## 6. Session infos
+## 7. Session infos
 ```r
 > sessionInfo()
 R version 4.1.2 (2021-11-01)
