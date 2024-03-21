@@ -47,10 +47,13 @@ sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30
 ```
 
 ### 5. Visualization of mapping results.
-```
+
+``` r
 sc.obj <- SCTransform(sc.obj, ncells = 3000, verbose = FALSE) %>%
     RunPCA(verbose = FALSE) %>%
     RunUMAP(dims = 1 : 30, verbose = FALSE)
+```
+``` r
 set.seed(2023063)
 cell.colors <- randomcoloR::distinctColorPalette(length(unique(sc.obj$mainCtype )))  %>% `names<-`(unique(sc.obj$mainCtype))
 gp1 <- SpatialPlot(sce, group.by = 'Cell2Spatial', pt.size.factor=0.6, cols = cell.colors, image.alpha = 0.5, stroke = NA)
