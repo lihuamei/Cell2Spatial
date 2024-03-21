@@ -179,7 +179,6 @@ estPropInSpots <- function(sp.obj, sc.obj, st.pvals, sc.markers, pval.cut = 0.05
 #' @return A data.frame of p-values.
 
 estPvalsOfSpot <- function(sp.obj, sp.score, knn = 5) {
-<<<<<<< HEAD
     dist.lst <- calcSpotsDist(sp.obj)
     avgs.vec <- colMeans(sp.score)
     sd.vec <- apply(sp.score, 2, var)
