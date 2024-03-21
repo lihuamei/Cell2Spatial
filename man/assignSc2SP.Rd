@@ -4,7 +4,6 @@
 \alias{assignSc2SP}
 \title{assignSc2SP}
 \usage{
-<<<<<<< HEAD
 assignSc2SP(
   sp.obj,
   sc.obj,
@@ -16,9 +15,6 @@ assignSc2SP(
   partion = TRUE,
   p.cut = 0.05
 )
-=======
-assignSc2SP(sp.obj, sc.obj, out.sim, num.cells, st.pvals, duplicated = FALSE)
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 }
 \arguments{
 \item{sp.obj}{Seurat object of ST data.}
@@ -27,7 +23,6 @@ assignSc2SP(sp.obj, sc.obj, out.sim, num.cells, st.pvals, duplicated = FALSE)
 
 \item{out.sim}{Similarity matrix between single-cells and spots.}
 
-<<<<<<< HEAD
 \item{num.cells}{A vector of cell count per spot projected to spots. Default: 10.}
 
 \item{st.pvals}{A data.frame of p-values of ST spots.}
@@ -39,13 +34,6 @@ assignSc2SP(sp.obj, sc.obj, out.sim, num.cells, st.pvals, duplicated = FALSE)
 \item{p.cut}{Cutoff pvalue to determine negative spots. Default: 0.05}
 
 \item{Split}{into sub-modules mapped to spatial positions. Default: TRUE.}
-=======
-\item{num.cells}{Number of cells projected to spots. Default: 10.}
-
-\item{st.pvals}{A data.frame of p-values of ST spots.}
-
-\item{duplicated}{Unique assign single-cells to spot or not. Default: FALSE.}
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 }
 \value{
 A list of assigned cells corresponding to spots.

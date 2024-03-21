@@ -11,13 +11,9 @@ runMap2SP(
   ctype = "idents",
   group.size = 30,
   res = 0.8,
-<<<<<<< HEAD
   integ = TRUE,
   duplicated = FALSE,
   partion = TRUE,
-=======
-  duplicated = FALSE,
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
   min.cells.of.subset = 5,
   max.cells.in.spot = 10,
   fix.cells.in.spot = NULL,
@@ -44,42 +40,27 @@ runMap2SP(
 
 \item{res}{Resolution for clustering ST spot. Default: 0.8.}
 
-<<<<<<< HEAD
 \item{integ}{Integration of SC and ST data or not. For high-resolution ST data, please set FALSE to accelerate the running time. Default: TRUE.}
 
 \item{duplicated}{Assigning individual cells to ST coordinates with duplicated or not. Default: FALSE.}
 
 \item{partion}{Split into sub-modules mapped to spatial positions when 'duplicated' set to TRUE. Default: TRUE.}
 
-=======
-\item{duplicated}{Assigning individual cells to ST coordinates with duplicated or not. Default: FALSE.}
-
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 \item{min.cells.of.subset}{Include cells detected in at least one cell type in the SC data. Default: 5.}
 
 \item{max.cells.in.spot}{Maximum number of cells in ST spots. Default: 10 (for 10x Visium).}
 
 \item{fix.cells.in.spot}{Fixed number of cells assigned to a spot. Default: NULL.}
 
-<<<<<<< HEAD
 \item{n.features}{Top k highly variable features used for integrating SC and ST data. Default: 3000.}
 
 \item{knn}{Utilizing the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.}
-=======
-\item{n.features}{Top k features used for integrating SC and ST data. Default: 3000.}
-
-\item{knn}{Top k nearest spots. Default: 5.}
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 
 \item{sample.size}{Down-sampling a small subset of SC data for mapping to ST coordinates. Default: NULL.}
 
 \item{select.markers}{Method for selecting cell-type specific markers when 'sc.markers = NULL': modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.}
 
-<<<<<<< HEAD
 \item{dist.method}{Measure the distance between single-cell and spots, maximum likehood model (mle) or correlation (cor). Default: mle.}
-=======
-\item{dist.method}{Measure the distance between single-cell and spots, maximum likehood model (mle) or correlation (cor). Default: Mle.}
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 
 \item{return.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
 

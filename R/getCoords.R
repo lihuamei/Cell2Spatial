@@ -95,7 +95,7 @@ assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, retu
 
     if (return.format == "Seurat") {
         coord.df <- data.frame(imagerow = map.cords$x, imagecol = map.cords$y) %>% `rownames<-`(rownames(map.cords))
-        if (class(obj.sp@images[[1]])[[1]] != "SlideSeq") {
+        if (class(sp.obj@images[[1]])[[1]] != "SlideSeq") {
             sce <- CreateSeuratObject(count = count.CT, meta.data = map.cords, project = "Cell2Spatial", assay = "Spatial")
             sce@images <- sp.obj@images
             sce@images[[1]]@assay <- DefaultAssay(sce)

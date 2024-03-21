@@ -4,7 +4,6 @@
 \alias{integDataBySeurat}
 \title{integDataBySeurat}
 \usage{
-<<<<<<< HEAD
 integDataBySeurat(
   sp.obj,
   sc.obj,
@@ -13,9 +12,6 @@ integDataBySeurat(
   integ = TRUE,
   verbose = TRUE
 )
-=======
-integDataBySeurat(sp.obj, sc.obj, npcs = 30, n.features = 3000, verbose = TRUE)
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 }
 \arguments{
 \item{sp.obj}{Seurat object of spatial transcriptome (ST) data.}
@@ -24,19 +20,12 @@ integDataBySeurat(sp.obj, sc.obj, npcs = 30, n.features = 3000, verbose = TRUE)
 
 \item{npcs}{Number of PCs for running UMAP. Default: 30.}
 
-<<<<<<< HEAD
 \item{integ}{Integrate SC and ST data or not. Default: TRUE.}
 
 \item{verbose}{Show running messages or not. Default: TRUE.}
 }
 \value{
 A list of information about integration.
-=======
-\item{verbose}{Show running messages or not. Default: TRUE.}
-}
-\value{
-Integrated Seurat object.
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 }
 \description{
 Integrate SC and ST data using Harmony method.

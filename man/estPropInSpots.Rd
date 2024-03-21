@@ -11,12 +11,8 @@ estPropInSpots(
   sc.markers,
   pval.cut = 0.05,
   knn = 5,
-<<<<<<< HEAD
   intercept = TRUE,
   chunk.size = 10000
-=======
-  intercept = TRUE
->>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
 )
 }
 \arguments{
