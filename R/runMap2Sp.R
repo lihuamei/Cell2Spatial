@@ -75,7 +75,6 @@ runMap2SP <- function(sp.obj,
     if (!duplicated) {
         println("Estimating cellular proportions in each spot", verbose = verbose)
         st.prop <- estPropInSpots(sp.obj, sc.obj, st.pvals, sc.markers, intercept = FALSE)
-	saveRDS(st.prop, file = 'st.prop.RDS')
         sc.obj <- adjustScObj(sc.obj, st.prop, num.cells)
         if (integ) {
             adj.w <- obj.list$adj.w[, sc.obj$RawName] %>% `colnames<-`(colnames(sc.obj))
