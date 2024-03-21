@@ -33,7 +33,8 @@ library(Seurat)
 library(dplyr)
 library(randomcoloR)
 library(tidydr)
-
+```
+``` r
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% readRDS(.)
 
