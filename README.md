@@ -58,24 +58,26 @@ gp1 + gp2
 ## 5. Setting parameters
 |**Parameters**|**Description**                      |
 |----------|-----------------------------------------|
-|sp.obj     |Seurat object of spatial transcriptome (ST) data.|
-|sc.obj  |Seurat object of single-cell (SC) data.|
-|sc.markers  |A list of markers for cell types. If not provided, automated inference is performed using the modified Shannon-entropy method. Default: NULL.|
-|ctype |Specify the column name for the cell type in meta.data slot of the SC Seurat object. Default: idents.|
-|group.size|Specify the marker size for each subset derived from single-cell data. This information is crucial for estimating the activity of markers within each cell type. Default: 30.|
-|res|Resolution for clustering ST spot. Default: 0.8.|
-|duplicated|Assigning individual cells to ST coordinates with duplicated or not. Default: FALSE.|
-|min.cells.of.subset|Include cells detected in at least one cell type in the SC data. Default: 5.|
-|max.cells.in.spot|Maximum number of cells in ST spots. Default: 10 (for 10x Visium).|
-|fix.cells.in.spot|Fixed number of cells assigned to a spot. Default: NULL.|
-|n.features|Top k features used for integrating SC and ST data. Default: 3000.|
-|knn|Top k nearest spots. Default: 5.|
-|sample.size|Down-sampling a small subset of SC data for mapping to ST coordinates. Default: NULL.|
-|select.markers|Method for selecting cell-type specific markers when 'sc.markers = NULL': modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.|
-|dist.method|Measure the distance between single-cell and spots, maximum likehood model (mle) or correlation (cor). Default: mle.|
-|return.type|Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.|
-|n.wrokers|Number of cores for parallel processing. Default: 4.|
-|verbose|Show running messages or not. Default: TRUE.|
+|sp.obj	|Seurat object of spatial transcriptome (ST) data.|
+|sc.obj	|Seurat object of single-cell (SC) data.|
+|sc.markers	|A list of markers for cell types. If not provided, automated inference is performed using the modified Shannon-entropy method. Default: NULL.|
+|ctype	|Specify the column name for the cell type in meta.data slot of the SC Seurat object. Default: idents.|
+|group.size	|Specify the marker size for each subset derived from single-cell data. This information is crucial for estimating the activity of markers within each cell type. Default: 30.|
+|res	|Resolution for clustering ST spot. Default: 0.8.|
+|integ	|Integration of SC and ST data or not. For high-resolution ST data, please set FALSE to accelerate the running time. Default: TRUE.|
+|duplicated	|Assigning individual cells to ST coordinates with duplicated or not. Default: FALSE.|
+|partion	|Split into sub-modules mapped to spatial positions when 'duplicated' set to TRUE. Default: TRUE.|
+|min.cells.of.subset	|Include cells detected in at least one cell type in the SC data. Default: 5.|
+|max.cells.in.spot	|Maximum number of cells in ST spots. Default: 10 (for 10x Visium).|
+|fix.cells.in.spot	|Fixed number of cells assigned to a spot. Default: NULL.|
+|n.features	|Top k highly variable features used for integrating SC and ST data. Default: 3000.|
+|knn	|Utilizing the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.|
+|sample.size	|Down-sampling a small subset of SC data for mapping to ST coordinates. Default: NULL.|
+|select.markers	|Method for selecting cell-type specific markers when 'sc.markers = NULL': modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.|
+|dist.method	|Measure the distance between single-cell and spots, maximum likehood model (mle) or correlation (cor). Default: mle.|
+|return.type	|Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.|
+|n.wrokers	|Number of cores for parallel processing. Default: 4.|
+|verbose	|Show running messages or not. Default: TRUE.|
 
 ## 6. Session infos
 ```r
