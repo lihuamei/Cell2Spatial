@@ -15,6 +15,7 @@ The Cell2Spatial's code comprises both R and Python components, necessitating es
 	* tensorflow
 	* keras
 	* sklearn
+	* lapjv
 * R (>= 4.0):
 	* reticulate
 	* Seurat
