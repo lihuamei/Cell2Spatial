@@ -11,8 +11,10 @@ In this tutorial, we'll showcase the installation and usage of Cell2Spatial, all
 The Cell2Spatial's code comprises both R and Python components, necessitating essential dependencies.
 * Python3:
 	* Numpy
-	* Scipy
 	* Pandas
+	* tensorflow
+	* keras
+	* sklearn
 * R (>= 4.0):
 	* reticulate
 	* Seurat
