@@ -1,0 +1,36 @@
+Package: Cell2Spatial
+<<<<<<< HEAD
+Title: Map Single-cell To Spatial Coordinates Based On 10X Genomics Platform.
+Version: 1.0.0
+Date: 2023-04-20
+Authors: c(person("Li", "Huamei", "li_hua_mei@163.com", role = c("aut"), comment = c(ORCID = "0009-0009-0112-0972")))
+Maintainer: Huamei Li <li_hua_mei@163.com>
+Description: A tool for accurately mapping single-cell to spatial coordinates.
+=======
+Title: Cell2Spatial: precisely deciphering spatial transcriptomic spots at single-cell granularity.
+Version: 1.0.1
+Date: 2023-12-01
+Authors: c(person("Li", "Huamei", "li_hua_mei@163.com", role = c("aut"), comment = c(ORCID = "0009-0009-0112-0972")))
+Maintainer: Huamei Li <li_hua_mei@163.com>
+Description: A tool for accurately mapping individual cells to spatial coordinates.
+>>>>>>> 5859e3527b186cec1e7cc9974128adabbcd95a88
+License: GPL (>= 3)
+Encoding: UTF-8
+Depends:
+    R (>= 4.0.0),
+    Seurat,
+    dplyr,
+    ggplot2,
+    reticulate
+Imports:
+    future,
+    future.apply,
+    SingleCellExperiment,
+    fields,
+    spatstat.random,
+    scales,
+    MatrixGenerics,
+    ggcorrplot,
+    MASS
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
