@@ -21,6 +21,9 @@ The Cell2Spatial's code comprises both R and Python components, necessitating es
 	* Seurat
 
 ## 2. Installation
+
+pip install -r requirements.txt 
+
 ``` r
 library(devtools)
 install_github("lihuamei/Cell2Spatial")
