@@ -99,7 +99,7 @@ runMap2SP <- function(sp.obj,
     partion <- ifelse(duplicated, FALSE, partion)
     out.sc <- assignSc2SP(sp.obj, sc.obj, out.sim, num.cells, st.pvals, n.features, duplicated, partion, p.cut = 0.05)
     println("Mapping single-cells to spatial coordinates...")
-    sce <- assignSCcords(sp.obj, sc.obj, out.sc, lapply(out.sc, length), return.type, n.workers = n.workers)
+    sce <- assignSCcords(sp.obj, sc.obj, out.sc, lapply(out.sc, length), match.arg(return.type), n.workers = n.workers)
     println("Finished!", verbose = verbose)
     return(sce)
 }

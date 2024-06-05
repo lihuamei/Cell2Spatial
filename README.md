@@ -28,7 +28,7 @@ install_github("lihuamei/Cell2Spatial")
 ```
 ## 3. Loading the packages and datasets (scRNA-seq and ST data)
 ``` r
-library(Cell2spatial)
+library(Cell2Spatial)
 library(Seurat)
 library(dplyr)
 library(randomcoloR)
@@ -55,7 +55,7 @@ sc.obj <- SCTransform(sc.obj, ncells = 3000, verbose = FALSE) %>%
 ```
 ``` r
 set.seed(2023063)
-cell.colors <- randomcoloR::distinctColorPalette(length(unique(sc.obj$mainCtype )))  %>% `names<-`(unique(sc.obj$mainCtype))
+cell.colors <- randomcoloR::distinctColorPalette(length(unique(sc.obj$mainCtype)))  %>% `names<-`(unique(sc.obj$mainCtype))
 gp1 <- SpatialPlot(sce, group.by = 'Cell2Spatial', pt.size.factor=0.6, cols = cell.colors, image.alpha = 0.5, stroke = NA)
 gp2 <- DimPlot(sc.obj, label = TRUE, cols = cell.colors) + theme_dr(xlength = 0.2, ylength = 0.2, arrow = grid::arrow(length = unit(0.1, "inches"), ends = 'last', type = "closed")) + theme(panel.grid = element_blank())
 gp1 + gp2
