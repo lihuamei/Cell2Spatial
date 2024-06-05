@@ -22,7 +22,7 @@ The Cell2Spatial's code comprises both R and Python components, necessitating es
 
 ## 2. Installation
 
-Python3 must be installed and configured in the environment for use with `reticulate`. Additionally, dependencies for Python libraries can be installed using the following command:
+* Python3 must be installed and configured in the environment for use with `reticulate`. Additionally, dependencies for Python libraries can be installed using the following command:
 
 ``` bash
 pip install -r requirements.txt 
