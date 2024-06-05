@@ -226,7 +226,7 @@ ctypesOfClusters <- function(sp.obj, st.pvals) {
     w.mat <- lapply(levels(sp.obj), function(cls) {
         spots <- colnames(sp.obj)[Idents(sp.obj) == cls]
         sub.pvals <- st.pvals[spots, ]
-        tmp.cnt <- colSums(sub.pvals < 0.05)
+        tmp.cnt <- colSums(sub.pvals < 0.00001)
         w.gs <- scales::rescale(tmp.cnt %>% as.numeric(), to = c(0, 1))
     }) %>%
         do.call(rbind, .) %>%

@@ -15,7 +15,9 @@ estCellPerSpots <- function(sp.obj, max.cells = 10, fix.cells.in.spot = NULL, qu
     } else {
         count.mat <- GetAssayData(sp.obj, slot = "count", assay = "Spatial") %>% as.data.frame()
         count.mat <- count.mat[!grepl("^MT|^RP[SL]", rownames(count.mat)), ]
-        rank.mat <- apply(count.mat, 2, rank)
+	umi.count <- rowMeans(count.mat)
+        count.mat <- count.mat[umi.count > quantile(umi.count, 0.1), ]
+	rank.mat <- apply(count.mat, 2, rank)
         rank.sd <- apply(rank.mat, 1, sd)
         genes <- rank.sd[order(rank.sd)][1:num.genes] %>% names()
         count.mat <- count.mat[genes, ]
