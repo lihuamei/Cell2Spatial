@@ -1,4 +1,4 @@
-#' @title runMap2SP
+#' @title runCell2Spatial
 
 #' @description Accurate mapping of single cells to spatial coordinates.
 #' @param sp.obj Seurat object of spatial transcriptome (ST) data.
@@ -26,8 +26,8 @@
 #' @examples
 #' sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
 #' sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% readRDS(.)
-#' sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30)
-runMap2SP <- function(sp.obj,
+#' sce <- runCell2Spatial(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30)
+runCell2Spatial <- function(sp.obj,
                       sc.obj,
                       ctype = "idents",
                       sc.markers = NULL,
