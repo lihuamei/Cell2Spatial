@@ -1,118 +1,16 @@
-#' @title integDataBySeurat
-
-#' @description Integrate SC and ST data using Harmony method.
-#' @param sp.obj Seurat object of spatial transcriptome (ST) data.
-#' @param sc.obj Seurat object of single-cell data.
-#' @param npcs Number of PCs for running UMAP. Default: 30.
-#' @param integ Integrate SC and ST data or not. Default: TRUE.
-#' @param verbose Show running messages or not. Default: TRUE.
-#' @return A list of information about integration.
-#' @export integDataBySeurat
-
-integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, integ = TRUE, verbose = TRUE) {
-    sc.obj$Batches <- "SC"
-    sp.obj$Batches <- "ST"
-    sc.obj <- SCTransform(sc.obj, verbose = verbose) %>% RunPCA(npcs = npcs, verbose = verbose)
-    sp.obj <- SCTransform(sp.obj, assay = "Spatial", verbose = verbose) %>% RunPCA(npcs = npcs, verbose = verbose)
-    if (integ) {
-        ifnb.list <- list(SC = sc.obj, ST = sp.obj)
-        features <- SelectIntegrationFeatures(object.list = ifnb.list, nfeatures = n.features)
-        ifnb.list <- PrepSCTIntegration(object.list = ifnb.list, anchor.features = features)
-        anchors <- FindIntegrationAnchors(
-            object.list = ifnb.list,
-            normalization.method = "SCT",
-            anchor.features = features,
-            verbose = verbose
-        )
-        obj <- IntegrateData(anchorset = anchors, normalization.method = "SCT", verbose = verbose)
-        obj <- RunPCA(obj, verbose = verbose)
-        obj <- RunUMAP(obj, reduction = "pca", dims = 1:npcs, verbose = verbose)
-        adj.w <- adjcentScOfSP(obj)
-    } else {
-        adj.w <- obj <- NULL
-    }
-    ovp.genes <- intersect(rownames(sp.obj), rownames(sc.obj))
-    return(list(obj = obj, sc.obj = sc.obj[ovp.genes, ], sp.obj = sp.obj[ovp.genes, ], adj.w = adj.w))
-}
-
-#' @title findClustersForSpData
-
-#' @description Find clusters for single-cell data based on Seurat object.
-#' @param obj.seu Seurat object of ST data.
-#' @param npcs Number of PCs for clustering. Default: 50.
-#' @param res Resolution for finding clusters. Default: 0.8.
-#' @return Seurat object after clustering.
-#' @export findClustersForSpData
-
-findClustersForSpData <- function(obj.seu, npcs = 30, res = 0.8, verbose = TRUE) {
-    obj.seu <- obj.seu %>%
-        FindNeighbors(., reduction = "pca", verbose = verbose) %>%
-        FindClusters(., verbose = verbose) %>%
-        RunUMAP(., reduction = "pca", dims = 1:npcs)
-    return(obj.seu)
-}
-
-#' @title adjcentScOfSP
-
-#' @description Generating distance matrix between ST spots and SC cells.
-#' @param obj Integrated Seurat object.
-#' @return A matrix of distance weights between ST and SC.
-
-adjcentScOfSP <- function(obj) {
-    umap.coord <- FetchData(obj, vars = c("UMAP_1", "UMAP_2", "Batches"))
-    umap.sp <- subset(umap.coord, Batches == "ST")[, 1:2]
-    umap.sc <- subset(umap.coord, Batches == "SC")[, 1:2]
-    adj.df <- future.apply::future_lapply(1:nrow(umap.sp), function(idx) {
-        xx <- umap.sp[idx, ] %>%
-            unlist() %>%
-            as.vector()
-        res.dist <- apply(umap.sc, 1, function(yy) {
-            sqrt(sum((xx - yy)^2))
-        })
-        res.dist <- (max(res.dist) - res.dist) / (max(res.dist) - min(res.dist))
-    }, future.seed = TRUE) %>%
-        do.call(rbind, .) %>%
-        as.data.frame() %>%
-        `rownames<-`(rownames(umap.sp))
-    adj.df <- as.matrix(adj.df)
-    return(adj.df)
-}
-
-#' @title getGsetScore
-
-#' @description Get singature scores in each cell or spot using a list of markers.
-#' @param obj.seu Seurat object.
-#' @param sc.markers A list of markers for cell-types.
-#' @param assay The assay used to calculate signature scores of cell types. Default: SCT.
-#' @return A data.frame of signatrue scores.
-#' @export getGsetScore
-
-getGsetScore <- function(obj.seu, sc.markers, assay = "SCT") {
-    expr <- GetAssayData(obj.seu, slot = "data", assay = assay)
-    score.df <- future.apply::future_lapply(names(sc.markers), function(ctype) {
-        gset <- sc.markers[[ctype]]
-        expr.sub <- expr[gset, ] %>% as.data.frame()
-        score <- colMeans(expr.sub, na.rm = TRUE)
-    }, future.seed = TRUE) %>%
-        do.call(rbind, .) %>%
-        t() %>%
-        `colnames<-`(names(sc.markers))
-    return(score.df)
-}
-
 #' @title estPropInSpots
 
-#' @description Infer whether a cell type belongs to a specific cluster.
-#' @param sp.obj Seurat object of spatial transcriptome (ST) data.
+#' @description Infer cellular proportions for spatial transcriptome (ST) spots.
+#' @param sp.obj Seurat object of ST data.
 #' @param sc.obj Seurat object of single-cell (SC) data.
-#' @param st.pvals A data.frame containing p-values to determine whether cell types are significantly present in a spot or not.
+#' @param hot.spts A data.frame containing boolean values to determine whether spots are hotspots or not.
 #' @param sc.markers A list of markers of cell types.
-#' @param pval.cut significant cutoff value. Default: 0.05
 #' @param knn K nearest cells used for estimating cellular proportions. Default: 5.
-#' @param intercept Using intercept or not for robust linear regression. Default: TRUE.
-#' @return A data frame of cellular fractions in each spot.
+#' @param intercept Boolean indicating whether to use intercept for robust linear regression. Default: TRUE.
+#' @param chunk.size Chunk size to determine downsampled ST data for estimating proportions. Default: 10000.
+#' @return A data frame of estimated cellular proportions in each spot.
 
-estPropInSpots <- function(sp.obj, sc.obj, st.pvals, sc.markers, pval.cut = 0.05, knn = 5, intercept = TRUE, chunk.size = 10000) {
+estPropInSpots <- function(sp.obj, sc.obj, hot.spts, sc.markers, knn = 5, intercept = TRUE, chunk.size = 10000) {
     base.ref <-
         {
             AverageExpression(sc.obj, slot = "data", assay = "SCT")$SCT
@@ -135,7 +33,7 @@ estPropInSpots <- function(sp.obj, sc.obj, st.pvals, sc.markers, pval.cut = 0.05
     } else {
         tar.spots <- colnames(sp.obj)
     }
-    w.mat <- ctypesOfClusters(sp.obj, st.pvals)
+    w.mat <- ctypesOfClusters(sp.obj, hot.spts)
 
     spot.prop <- future.apply::future_lapply(tar.spots, function(spot) {
         knn.spots <- dist.mat[spot, ] %>% rownames(dist.mat)[.]
@@ -164,109 +62,101 @@ estPropInSpots <- function(sp.obj, sc.obj, st.pvals, sc.markers, pval.cut = 0.05
     }, future.seed = TRUE) %>%
         do.call(rbind, .) %>%
         as.data.frame() %>%
-        `rownames<-`(colnames(tar.spots)) %>%
+        `rownames<-`(tar.spots) %>%
         `colnames<-`(cell.types)
     spot.prop <- spot.prop[!is.na(rowSums(spot.prop)), ]
     return(spot.prop)
 }
 
-#' @title estPvalsOfSpot
-
-#' @description Infer whether signature score in spot significant higher than background.
-#' @param sp.obj Seurat object of spatial transcriptome (ST) data.
-#' @param sp.score Signature score of cell types.
-#' @param knn K nearest cells used. Default: 5.
-#' @return A data.frame of p-values.
-
-estPvalsOfSpot <- function(sp.obj, sp.score, knn = 5) {
-    dist.lst <- calcSpotsDist(sp.obj)
-    avgs.vec <- colMeans(sp.score)
-    sd.vec <- apply(sp.score, 2, var)
-    nctypes <- ncol(sp.score)
-    n1 <- knn + 1
-    n2 <- nrow(sp.score)
-    sd.vec.new <- (sd.vec^2 / (n2^2 * (n2 - 1)))
-    fix.value.n1 <- n1^2 * (n1 - 1)
-
-    spot.pvals <- future.apply::future_lapply(rownames(sp.score), function(spot) {
-        spot.ids <- dist.lst[[Idents(sp.obj)[spot]]]
-        knn.spots <- spot.ids[spot, ] %>%
-            rownames(spot.ids)[.] %>%
-            c(spot, .)
-
-        pval.ctype <- rep(1, nctypes) %>% `names<-`(colnames(sp.score))
-        vec1.mean <- colMeans(sp.score[knn.spots, ])
-        bool.vec <- vec1.mean - avgs.vec
-        idxes <- which(bool.vec > 0)
-        if (length(idxes) == 0) {
-            return(pval.ctype)
-        }
-        sig.spots <- lapply(names(idxes), function(ctype) {
-            var1 <- var(sp.score[knn.spots, ctype])
-            var2 <- sd.vec[ctype]
-            df <- ((var1 / n1 + var2 / n2)^2) / ((var1^2 / fix.value.n1) + sd.vec.new[ctype])
-            t.statistic <- bool.vec[ctype] / sqrt(var1 / n1 + var2 / n2)
-            p.value <- pt(t.statistic, df, lower.tail = FALSE)
-            # t.test(sp.score[knn.spots, ctype], sp.score[-spot.ids[spot, ], ctype], alternative = "greater")$p.value
-        }) %>%
-            unlist() %>%
-            as.vector() %>%
-            `names<-`(names(idxes))
-        pval.ctype[names(sig.spots)] <- sig.spots
-        pval.ctype
-    }, future.seed = TRUE) %>%
-        do.call(rbind, .) %>%
-        `rownames<-`(rownames(sp.score))
-    return(spot.pvals)
-}
-
 #' @title ctypesOfClusters
 
-ctypesOfClusters <- function(sp.obj, st.pvals) {
+#' @description Calculates weighted scores of cellular types across clusters based on spatial transcriptomics (ST) data and hotspot information.
+#' @param sp.obj Seurat object of ST data.
+#' @param hot.spts A data.frame containing boolean values to determine whether spots are hotspots or not.
+#' @return A data frame where each row represents a cluster and each column represents a cellular type, with values indicating weighted scores.
+
+ctypesOfClusters <- function(sp.obj, hot.spts) {
     w.mat <- lapply(levels(sp.obj), function(cls) {
         spots <- colnames(sp.obj)[Idents(sp.obj) == cls]
-        sub.pvals <- st.pvals[spots, ]
-        tmp.cnt <- colSums(sub.pvals < 0.00001)
+        sub.pvals <- hot.spts[spots, ]
+        if (length(spots) > 1) {
+            tmp.cnt <- colSums(sub.pvals)
+        } else {
+            tmp.cnt <- sum(sub.pvals)
+        }
         w.gs <- scales::rescale(tmp.cnt %>% as.numeric(), to = c(0, 1))
     }) %>%
         do.call(rbind, .) %>%
         as.data.frame() %>%
         `rownames<-`(levels(sp.obj)) %>%
-        `colnames<-`(colnames(st.pvals))
+        `colnames<-`(colnames(hot.spts))
     return(w.mat)
 }
 
-#' @title selectScByCor
+#' @title weightSimScore
 
-#' @description Select single-cells based on weighted correlation.
-#' @param sp.score Score matrix of ST inferred from a list of markers.
-#' @param sc.score Score matrix of SC inferred from a list of markers.
-#' @param adj.w A weighted matrix infered from distance. Rows represent spot names, and cloumns are single-cells.
-#' @return Similarity matrix.
+#' @description Applies weighted adjustment to similarity scores between spots and cell types based on provided adjustment weights and hotspot information.
+#' @param out.sim Matrix or data frame of similarity scores between spots and cell types.
+#' @param adj.w Weight matrix specifying adjustments for each spot and cell type combination.
+#' @param spot.name Vector or list of spot names.
+#' @param cell.names Vector or list of cell type names.
+#' @param hot.spts A data frame indicating hotspot presence in spots and cell types.
+#' @return Weighted similarity scores matrix where adjustments are applied based on provided weights and hotspot information.
 
-selectScByCor <- function(sp.score, sc.score, adj.w) {
-    cor.mat <- cor(t(sp.score), t(sc.score))
-    out.sim <-
+weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts) {
+    spot.name <- as.vector(spot.name) %>% `names<-`(names(spot.name))
+    cell.names <- as.vector(cell.names) %>% `names<-`(names(cell.names))
+    out.sim.sub <- out.sim[names(spot.name), names(cell.names)]
+    adj.w.sub <- adj.w[spot.name, cell.names] %>%
+        `colnames<-`(names(cell.names)) %>%
+        `rownames<-`(names(spot.name))
+    out.sim.w <-
         {
-            if (inherits(adj.w, "matrix")) {
-                adj.w <- adj.w[, rownames(sc.score)]
-                cor.mat * adj.w
-            } else {
-                cor.mat
-            }
+            out.sim.sub * adj.w.sub
         } %>% t()
-    return(out.sim)
+    # hot.spts.flat <- hot.spts[names(spot.name), cell.names] %>%
+    #    `colnames<-`(names(cell.names)) %>%
+    #    t()
+    # idxes <- which(hot.spts.flat == FALSE)
+    # out.sim.w[idxes] <- out.sim.w[idxes] - 1
+    return(out.sim.w)
+}
+
+#' @title weigthNetProb
+
+#' @description Adjusts FNN predictions based on cell type proportions derived from SC and ST data, considering hotspot information.
+#' @param netx.pred Matrix or data frame of network predictions.
+#' @param sc.obj Seurat object of SC data.
+#' @param sp.obj Seurat object of ST data.
+#' @param hot.spts A data frame indicating hotspot presence in spots and cell types.
+#' @return Adjusted network predictions matrix where weights are applied based on cell type proportions and hotspot information.
+
+weigthNetProb <- function(netx.pred, sc.obj, sp.obj, hot.spts) {
+    hot.spts.new <- cbind.data.frame(hot.spts, CLUSTER = Idents(sp.obj)[rownames(hot.spts)])
+    cluster.summary <- hot.spts.new %>%
+        pivot_longer(cols = -CLUSTER, names_to = "Cell_Type", values_to = "Count") %>%
+        group_by(CLUSTER, Cell_Type) %>%
+        summarize(Total_Count = sum(Count)) %>%
+        pivot_wider(names_from = Cell_Type, values_from = Total_Count, values_fill = 0) %>%
+        as.data.frame() %>%
+        `rownames<-`(.[, 1]) %>%
+        .[, -1] %>%
+        sweep(., 2, colSums(.), "/") %>%
+        t()
+    weight.mat <- cluster.summary[Idents(sc.obj) %>% .[rownames(netx.pred)], colnames(netx.pred)]
+    weight.mat <- weight.mat > 0
+    netx.pred.new <- netx.pred * weight.mat
+    return(netx.pred.new)
 }
 
 #' @title selectByProb
 
-#' @description Measuring the similarity distances using probability model.
-#' @param sp.score
-#' @param sc.score
-#' @param adj.w
-#' @return Similarity matrix.
+#' @description Computes a similarity score matrix based on spatial and single-cell signature scores, adjusting for probabilities.
+#' @param sp.score Matrix or data frame of ST signature scores.
+#' @param sc.score Matrix or data frame of SC signature scores.
+#' @return Similarity matrix where each row represents a spatial spot and each column represents a single-cell, adjusted based on computed probabilities.
 
-selectByProb <- function(sp.score, sc.score, adj.w) {
+selectByProb <- function(sp.score, sc.score) {
     probs <-
         {
             log2(sc.score + 1e-6) - log2(rowSums(sc.score) + ncol(sc.score) * 1e-6)
@@ -278,28 +168,22 @@ selectByProb <- function(sp.score, sc.score, adj.w) {
     max.vec <- apply(out.sim, 1, max)
     min.vec <- apply(out.sim, 1, min)
     out.sim <- sweep(out.sim, 1, min.vec, "-") %>% sweep(., 1, max.vec - min.vec, "/")
-    out.sim <-
-        {
-            if (inherits(adj.w, "matrix")) {
-                out.sim * adj.w
-            } else {
-                out.sim
-            }
-        } %>% t()
     return(out.sim)
 }
 
 #' @title featureSelelction
 
-#' @description
-#' @param sp.obj Seurat object of ST data.
-#' @param sc.obj Seurat object of SC data.
-#' @param n.features Common features between SC and ST data.
-#' @return
-#' @export featureSelelction
+#' @description Performs feature selection and data integration between spatial transcriptomics (ST) and single-cell (SC) data.
+#' @param sp.obj Seurat object containing ST data.
+#' @param sc.obj Seurat object containing SC data.
+#' @param n.features Number of features to select for integration.
+#' @param verbose Boolean indicating whether to display verbose messages during processing. Default: TRUE.
+#' @return A list containing integrated Seurat objects for SC (`sc.int`) and ST (`st.int`) data.
 
-featureSelelction <- function(sp.obj, sc.obj, n.features) {
-    sc.obj <- SCTransform(sc.obj, verbose = FALSE)
+featureSelelction <- function(sp.obj, sc.obj, n.features, verbose = TRUE) {
+    if (sc.obj@active.assay != "SCT") {
+        sc.obj <- SCTransform(sc.obj, verbose = verbose, method = "glmGamPoi")
+    }
     ifnb.list <- list(SC = sc.obj, ST = sp.obj)
     features <- SelectIntegrationFeatures(object.list = ifnb.list, nfeatures = n.features)
     sc.st.anchors <- Seurat::FindTransferAnchors(
@@ -308,7 +192,8 @@ featureSelelction <- function(sp.obj, sc.obj, n.features) {
         reference.assay = "SCT",
         query.assay = "SCT",
         features = features,
-        reduction = "cca"
+        reduction = "cca",
+        verbose = verbose
     )
     st.data.trans <- Seurat::TransferData(
         anchorset = sc.st.anchors,
@@ -323,7 +208,7 @@ featureSelelction <- function(sp.obj, sc.obj, n.features) {
     sc.st.int <- CreateSeuratObject(counts = counts.temp, assay = "traint")
     sc.st.int[["traint"]]@data <- sc.st.int[["traint"]]@counts
     sc.st.int[["traint"]]@counts <- matrix(NA, nrow = 0, ncol = 0)
-    sc.st.int <- ScaleData(sc.st.int, features = features) %>% RunPCA(features = features)
+    sc.st.int <- ScaleData(sc.st.int, features = features, verbose = verbose) %>% RunPCA(features = features, verbose = verbose)
     sc.int <- subset(sc.st.int, cells = colnames(sc.obj))
     st.int <- subset(sc.st.int, cells = colnames(sp.obj))
     Idents(st.int) <- Idents(sp.obj)
@@ -332,12 +217,12 @@ featureSelelction <- function(sp.obj, sc.obj, n.features) {
 
 #' @title partionClusters
 
-#' @description Partion single-cells to sub-clusters using deep learning strategy.
-#' @param sp.obj Seurat object of ST data.
-#' @param sc.obj Seurat object of SC data.
+#' @description Partition single cells into sub-clusters using a deep learning strategy based on integration of spatial transcriptomics (ST) and single-cell (SC) data.
+#' @param sp.obj Seurat object containing ST data.
+#' @param sc.obj Seurat object containing SC data.
+#' @param n.features Number of common features selected for integration between SC and ST data.
 #' @param num.cells A vector of cell counts in spots.
-#' @param n.features Number of common features between SC and ST data.
-#' @return A list of single-cells in each cluster.
+#' @return A list of single cells partitioned into sub-clusters.
 #' @export partionClusters
 
 partionClusters <- function(sp.obj, sc.obj, n.features, num.cells) {
@@ -365,6 +250,7 @@ partionClusters <- function(sp.obj, sc.obj, n.features, num.cells) {
         unlist() %>%
         `names<-`(levels(sp.int))
 
+    netx.pred <- weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
     netx.pred.scale <- sweep(netx.pred, MARGIN = 1, apply(netx.pred, 1, max), "/")
     max.idxes <- apply(netx.pred, 1, which.max) %>%
         colnames(netx.pred)[.] %>%
@@ -406,29 +292,33 @@ partionClusters <- function(sp.obj, sc.obj, n.features, num.cells) {
         flag.id.update <- c(flag.id.update, flag.id)
         flag.id <- c()
     }
-    index.lst[[setdiff(names(target.counts), names(index.lst))]] <- setdiff(colnames(sc.int), unlist(index.lst))
+    diff.ct <- setdiff(names(target.counts), names(index.lst))
+    if (length(diff.ct) > 0) {
+        index.lst[[diff.ct]] <- setdiff(colnames(sc.int), unlist(index.lst))
+    }
     index.lst <- index.lst[names(target.counts)]
     return(index.lst)
 }
 
 #' @title linearSumAssignment
 
-#' @description Assign single-cells to spatial coordinates.
-#' @param sp.obj Seurat object of ST data.
-#' @param sc.obj Seurat object of SC data.
-#' @param out.sim Similarity matrix between single-cells and spots.
-#' @param num.cells A vector of cell count per spot projected to spots. Default: 10.
-#' @param n.features Number of common features between SC and ST data.
-#' @param partion Split into sub-modules mapped to spatial positions. Default: TRUE.
+#' @description Assigns single cells to spatial coordinates based on similarity scores between single-cell and spatial transcriptomics (ST) data.
+#' @param sp.obj Seurat object containing ST data.
+#' @param sc.obj Seurat object containing SC data.
+#' @param out.sim Similarity matrix between single cells and spots.
+#' @param adj.w Weight matrix for adjusting similarity scores.
+#' @param num.cells A vector indicating the cell count per spot projected to spots.
+#' @param hot.spts Data frame indicating hotspot presence in spots and cell types.
+#' @param partion Logical indicating whether to split into sub-modules mapped to spatial positions. Default: TRUE.
 #' @return A list of assigned cells corresponding to spots.
 #' @export linearSumAssignment
 
-linearSumAssignment <- function(sp.obj, sc.obj, out.sim, num.cells, n.features, partion = TRUE) {
+linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, partion = TRUE) {
     if (partion) {
-        index.lst <- partionClusters(sp.obj, sc.obj, n.features, num.cells)
+        index.lst <- partionClusters(sp.obj, sc.obj, num.cells, hot.spts)
     } else {
         if (nrow(out.sim) > 30000) {
-            index.lst <- partionClusters(sp.obj, sc.obj, n.features, num.cells)
+            index.lst <- partionClusters(sp.obj, sc.obj, num.cells, hot.spts)
         } else {
             index.lst <- list(ENTIRE = NULL)
         }
@@ -436,10 +326,14 @@ linearSumAssignment <- function(sp.obj, sc.obj, out.sim, num.cells, n.features, 
     assign.res <- future.apply::future_lapply(names(index.lst), function(cls) {
         if (cls != "ENTIRE") {
             spot.sub <- colnames(sp.obj)[Idents(sp.obj) == cls]
-            out.sim.sub <- out.sim[index.lst[[cls]], spot.sub]
+            out.sim.sub <- out.sim[spot.sub, index.lst[[cls]]]
         } else {
             out.sim.sub <- out.sim
         }
+        spot.name <- Idents(sp.obj)[rownames(out.sim.sub)]
+        cell.names <- Idents(sc.obj)[colnames(out.sim.sub)]
+        out.sim.sub <- weightSimScore(out.sim.sub, adj.w, spot.name, cell.names, hot.spts)
+
         tmp.dir <- tempdir()
         sim.file <- file.path(tmp.dir, sprintf("sim_%s.xls", cls))
         num.file <- file.path(tmp.dir, sprintf("num_%s.xls", cls))
@@ -457,39 +351,5 @@ linearSumAssignment <- function(sp.obj, sc.obj, out.sim, num.cells, n.features, 
         as.data.frame()
     out.sc <- split(assign.res$CELL, assign.res$SPOT)
     out.sc <- out.sc[colnames(sp.obj)]
-    return(out.sc)
-}
-
-#' @title assignSc2SP
-
-#' @description Assign single-cells to spots using linear assignment method.
-#' @param sp.obj Seurat object of ST data.
-#' @param sc.obj Seurat object of SC data.
-#' @param out.sim Similarity matrix between single-cells and spots.
-#' @param num.cells A vector of cell count per spot projected to spots. Default: 10.
-#' @param st.pvals A data.frame of p-values of ST spots.
-#' @param n.features Number of common features between SC and ST data.
-#' @param duplicated Unique assign single-cells to spot or not. Default: FALSE.
-#' @param Split into sub-modules mapped to spatial positions. Default: TRUE.
-#' @param p.cut Cutoff pvalue to determine negative spots. Default: 0.05
-#' @return A list of assigned cells corresponding to spots.
-
-assignSc2SP <- function(sp.obj, sc.obj, out.sim, num.cells, st.pvals, n.features, duplicated = FALSE, partion = TRUE, p.cut = 0.05) {
-    idxes <- which(st.pvals > p.cut)
-    out.sim[idxes] <- out.sim[idxes] - 1
-    if (!duplicated) {
-        out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, num.cells, n.features, partion)
-    } else {
-        out.sc <- lapply(1:ncol(out.sim), function(xx) {
-            spot <- colnames(out.sim)[xx]
-            bb.x <- out.sim[, xx]
-            bb.x[order(bb.x) %>% rev()] %>%
-                names(.) %>%
-                .[1:num.cells[[xx]]] %>%
-                .[!is.na(.)]
-        }) %>%
-            `names<-`(colnames(out.sim)) %>%
-            .[(lapply(., length) > 0)]
-    }
     return(out.sc)
 }

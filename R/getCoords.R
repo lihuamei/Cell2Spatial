@@ -2,6 +2,7 @@
 
 #' @description Identified significant spots located in medulla areas and calculate the distances between spots.
 #' @param sp.obj Spatial seurat object data.
+#' @param knn Number of nearest cells used for estimating cellular proportions. Default: 5.
 #' @return A list distance relationship.
 
 calcSpotsDist <- function(sp.obj, knn = 5) {
@@ -28,7 +29,13 @@ getRandomCords <- function(sp.coord, num.cells, seed = 123456, n.workers = 4) {
     set.seed(seed)
     future::plan("multicore", workers = n.workers)
     if (is.numeric(num.cells)) num.cells <- as.list(num.cells) %>% `names<-`(names(num.cells))
-    min.dist <- dbscan::kNN(sp.coord[, c(1, 2)], k = 2) %>% { .$dist[, 1] } %>% { median(.) / 2 }
+    min.dist <- dbscan::kNN(sp.coord[, c(1, 2)], k = 2) %>%
+        {
+            .$dist[, 1]
+        } %>%
+        {
+            median(.) / 2
+        }
     sp.coord.new <- future.apply::future_lapply(1:nrow(sp.coord), function(idx) {
         if (num.cells[[idx]] > 1) {
             circle <- spatstat.random::runifdisc(
@@ -68,7 +75,7 @@ getRandomCords <- function(sp.coord, num.cells, seed = 123456, n.workers = 4) {
 #' @export assignSCcords
 
 assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, return.format = "Seurat") {
-    sp.cords <- GetTissueCoordinates(sp.obj) %>% .[intersect(rownames(.), names(out.sc)), 1 : 2]
+    sp.cords <- GetTissueCoordinates(sp.obj) %>% .[intersect(rownames(.), names(out.sc)), 1:2]
     sp.obj <- sp.obj[, rownames(sp.cords)]
     out.sc <- out.sc[rownames(sp.cords)]
     cord.new <- getRandomCords(sp.cords, num.cells = num.cells, n.workers = n.workers)
@@ -103,7 +110,7 @@ assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, retu
             sce@images[[1]]@scale.factors <- sp.obj@images[[1]]@scale.factors
             sce@images[[1]]@coordinates <- sce@images[[1]]@coordinates / sce@images[[1]]@scale.factors$lowres
         } else {
-            sce <- createSpatialObject(count = count.CT, coord.df = coord.df, meta.data = map.cords, coord.label = c('imagerow', 'imagecol'))
+            sce <- createSpatialObject(count = count.CT, coord.df = coord.df, meta.data = map.cords, coord.label = c("imagerow", "imagecol"))
         }
     } else {
         sce <- SingleCellExperiment::SingleCellExperiment(

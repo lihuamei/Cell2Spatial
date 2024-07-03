@@ -188,7 +188,7 @@ coExistIndex <- function(sce, min.cells = 0) {
 #' @param coord.df A data.frame of coordinates for spatial barcodes. The coordinates are placed in the first two columns.
 #' @param class Class name of the Spatial image slot. Default: SlideSeq.
 
-createSpatialObject <- function(counts, coord.df, coord.label = c('x', 'y'), meta.data = NULL, class = "SlideSeq") {
+createSpatialObject <- function(counts, coord.df, coord.label = c("x", "y"), meta.data = NULL, class = "SlideSeq") {
     ovp.spots <- intersect(colnames(counts), rownames(coord.df))
     if (!is.null(meta.data)) ovp.spots <- intersect(ovp.spots, rownames(meta.data))
     if (length(ovp.spots) == 0) println("No shared barcodes between count matrix and coordinates", verbose = TRUE, status = "ERROR")
