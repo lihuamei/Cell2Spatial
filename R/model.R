@@ -8,7 +8,7 @@
 #' @param knn K nearest cells used for estimating cellular proportions. Default: 5.
 #' @param intercept Boolean indicating whether to use intercept for robust linear regression. Default: TRUE.
 #' @param chunk.size Chunk size to determine downsampled ST data for estimating proportions. Default: 10000.
-#' @return A data frame of estimated cellular proportions in each spot.
+#' @return A list of estimated cellular proportions in spots and clusters.
 
 estPropInSpots <- function(sp.obj, sc.obj, hot.spts, sc.markers, knn = 5, intercept = TRUE, chunk.size = 10000) {
     base.ref <-
@@ -65,7 +65,14 @@ estPropInSpots <- function(sp.obj, sc.obj, hot.spts, sc.markers, knn = 5, interc
         `rownames<-`(tar.spots) %>%
         `colnames<-`(cell.types)
     spot.prop <- spot.prop[!is.na(rowSums(spot.prop)), ]
-    return(spot.prop)
+    clst.prop <- st.prop %>%
+        mutate(CLUSTER = Idents(sp.obj)[rownames(.)]) %>%
+        group_by(CLUSTER) %>%
+        summarise(across(everything(), sum, na.rm = TRUE)) %>%
+        as.data.frame() %>%
+        `rownames<-`(.[, "CLUSTER"]) %>%
+        select(-CLUSTER)
+    return(list(spot = spot.prop, cls = clst.prop))
 }
 
 #' @title ctypesOfClusters
@@ -226,7 +233,7 @@ featureSelelction <- function(sp.obj, sc.obj, n.features, verbose = TRUE) {
 #' @export partionClusters
 
 partionClusters <- function(sp.obj, sc.obj, n.features, num.cells) {
-    sc.st.int <- featureSelelction(sp.obj, sc.obj, n.features)
+    sc.st.int <- featureSelelction(sp.obj, sc.obj, n.features, verbose = FALSE)
     sc.int <- sc.st.int$sc
     sp.int <- sc.st.int$st
     python.script <- system.file("R/netx.py", package = "Cell2Spatial")

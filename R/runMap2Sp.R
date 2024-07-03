@@ -28,24 +28,24 @@
 #' sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% readRDS(.)
 #' sce <- runCell2Spatial(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30)
 runCell2Spatial <- function(sp.obj,
-                      sc.obj,
-                      ctype = "idents",
-                      sc.markers = NULL,
-                      group.size = 30,
-                      res = 0.8,
-                      partion = TRUE,
-                      max.cells.in.spot = 10,
-                      fix.cells.in.spot = NULL,
-                      knn = 5,
-                      sample.size = NULL,
-                      detect.hotspot.method = c("getis.ord", "t.test"),
-                      p.value.threshold = 0.1,
-                      quantile.threshold = 0.99,
-                      select.markers = c("shannon", "wilcox"),
-                      dist.method = c("mle", "cor"),
-                      return.type = c("Seurat", "SingleCellExperiment"),
-                      n.workers = 4,
-                      verbose = TRUE) {
+                            sc.obj,
+                            ctype = "idents",
+                            sc.markers = NULL,
+                            group.size = 30,
+                            res = 0.8,
+                            partion = TRUE,
+                            max.cells.in.spot = 10,
+                            fix.cells.in.spot = NULL,
+                            knn = 5,
+                            sample.size = NULL,
+                            detect.hotspot.method = c("getis.ord", "t.test"),
+                            p.value.threshold = 0.1,
+                            quantile.threshold = 0.99,
+                            select.markers = c("shannon", "wilcox"),
+                            dist.method = c("mle", "cor"),
+                            return.type = c("Seurat", "SingleCellExperiment"),
+                            n.workers = 4,
+                            verbose = TRUE) {
     options(warn = -1)
     options(future.rng.onMisuse = "ignore")
     bl.status <- as.list(environment()) %>% checkParams.runMap2SP(.)
