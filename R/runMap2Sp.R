@@ -1,5 +1,5 @@
 #' @title runCell2Spatial
-
+#'
 #' @description Accurate mapping of single cells to spatial coordinates.
 #' @param sp.obj Seurat object of spatial transcriptome (ST) data.
 #' @param sc.obj Seurat object of single-cell (SC) data.

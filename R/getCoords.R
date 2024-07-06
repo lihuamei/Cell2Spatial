@@ -1,5 +1,5 @@
 #' @title calcSpotsDist
-
+#'
 #' @description Identified significant spots located in medulla areas and calculate the distances between spots.
 #' @param sp.obj Spatial seurat object data.
 #' @param knn Number of nearest cells used for estimating cellular proportions. Default: 5.
@@ -16,7 +16,7 @@ calcSpotsDist <- function(sp.obj, knn = 5) {
 }
 
 #' @title getRandomCords
-
+#'
 #' @description Get random coordinates for mapping single-cells to spatial.
 #' @param sp.coord Coordinates of ST image data.
 #' @param num.cells A list of number of cells for mapping to spot.

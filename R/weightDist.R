@@ -1,5 +1,5 @@
 #' @title psedoSpotExprUseSC
-
+#'
 #' @description Pseudo purity spots expression based on SC data.
 #' @param sc.obj Seurat object of SC data.
 #' @param sp.obj Seurat object of ST data.
@@ -36,7 +36,7 @@ psedoSpotExprUseSC <- function(sc.obj, sp.obj, pseu.cnt = 200, lamba = 5, mc.cor
 }
 
 #' @title integDataBySeurat
-
+#'
 #' @description Integrate SC and ST data normalized by the LogNormalize method using the CCA method.
 #' @param sp.obj Seurat object of spatial transcriptome (ST) data.
 #' @param sc.obj Seurat object of single-cell data.
@@ -75,7 +75,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, verb
 }
 
 #' @title findClustersForSpData
-
+#'
 #' @description Find clusters for single-cell data based on Seurat object.
 #' @param obj.seu Seurat object of ST data.
 #' @param npcs Number of PCs for clustering. Default: 50.
@@ -91,7 +91,7 @@ findClustersForSpData <- function(obj.seu, npcs = 30, res = 0.8, verbose = TRUE)
 }
 
 #' @title adjcentScOfSP
-
+#'
 #' @description Generating distance matrix between ST spots and SC cells.
 #' @param obj Integrated Seurat object.
 #' @return A matrix of distance weights between ST and SC.
@@ -133,7 +133,7 @@ adjcentScOfSP <- function(obj) {
 }
 
 #' @title adjcentScOfSPGlobal
-
+#'
 #' @description Generating distance matrix between ST spots and SC cells.
 #' @param obj Integrated Seurat object.
 #' @return A matrix of distance weights between ST and SC.
@@ -159,9 +159,8 @@ adjcentScOfSPGlobal <- function(obj) {
 }
 
 #' @title weightDist
-
+#'
 #' @description Weight distance between SC and ST data.
-
 #' @param sc.obj Seurat object of SC data.
 #' @param sp.obj Seurat object of ST data.
 #' @param lamba Median of cell counts for spots.

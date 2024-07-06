@@ -1,5 +1,5 @@
 #' @title estCellPerSpots
-
+#'
 #' @description Estimate the number of cells per spot using regression method.
 #' @param sp.obj Seurat object of spatial transcriptomics (ST) data.
 #' @param max.cells Maximum number of cells in Spots. Default: 10 (10x Genomics).
@@ -37,7 +37,7 @@ estCellPerSpots <- function(sp.obj, max.cells = 10, fix.cells.in.spot = NULL, qu
 }
 
 #' @title adjustScObj
-
+#'
 #' @description Adjust single-cell (SC) data by incorporating inferred proportions and cell counts for mapping to spatial transcriptomics (ST) spots
 #' @param sc.obj Seurat object of single-cell (SC) data.
 #' @param st.prop A data.frame containing proportions for ST data.

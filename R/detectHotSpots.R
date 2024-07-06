@@ -1,5 +1,5 @@
 #' @title getGsetScore
-
+#'
 #' @description Get signature scores in each cell or spot using a list of markers.
 #' @param obj.seu Seurat object.
 #' @param sc.markers A list of markers for cell types.
@@ -21,7 +21,7 @@ getGsetScore <- function(obj.seu, sc.markers, assay = "SCT") {
 }
 
 #' @title dectHotSpotsByTtest
-
+#'
 #' @description Infer whether the signature scores in spots significant higher than background.
 #' @param sp.obj Seurat object of spatial transcriptome (ST) data.
 #' @param sp.score Signature score of cell types.
@@ -72,7 +72,7 @@ dectHotSpotsByTtest <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0
 }
 
 #' @title dectHotSpotsByGetisOrdGi
-
+#'
 #' @description Detect hot spots using Getis-Ord Gi* index
 #' @param sp.obj Seurat object of spatial transcriptome (ST) data.
 #' @param sp.score Signature score of cell types.

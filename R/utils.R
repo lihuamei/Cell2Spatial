@@ -1,5 +1,5 @@
 #' @title println
-
+#'
 #' @description Print out message if verbose equals TRUE.
 #' @param infos Message that need to be printed.
 #' @param status Normal running messages, warn, or error. Default: INFO (normal status).
@@ -16,7 +16,7 @@ println <- function(X, verbose = TRUE, status = c("INFO", "ERROR", "WARN"), ...)
 }
 
 #' @title multipleProcess
-
+#'
 #' @description Open multiple workers for Seurat processing.
 #' @param n.workers Number of cores. Default: 4.
 #' @return NULL
@@ -27,7 +27,7 @@ multipleProcess <- function(n.workers = 4) {
 }
 
 #' @title downSamplSeurat
-
+#'
 #' @description Down-sampling for Seurat obeject.
 #' @param obj.seu Seurat object
 #' @param cnt Sampling size for each ident. Default: 500.
@@ -49,7 +49,7 @@ downSamplSeurat <- function(obj.seu, cnt = 500, percent = NULL, seed = 123456) {
 }
 
 #' @title findScMarkers
-
+#'
 #' @description Find markers among cell types based on SC data.
 #' @param sc.obj Seurat object of single-cell data.
 #' @param group.size Marker size of each subset derived from SC data. Default: 30.
@@ -110,7 +110,7 @@ findScMarkers <- function(sc.obj, group.size, select.markers = c("shannon", "wil
 }
 
 #' @title coExistIndex
-
+#'
 #' @description Calculation of co-exists index.
 #' @param sce Seurat or SingleCellExperiment object returned from runMap2Sp function.
 #' @param min.cells Cell types with number of cells must be greater than k. Default: 0.
@@ -153,7 +153,7 @@ coExistIndex <- function(sce, min.cells = 0) {
 }
 
 #' @title createSpatialObject
-
+#'
 #' @description Create Spatial seurat object for ST data from other platforms.
 #' @param counts UMI count matrix, rows are genes and columns are barcodes.
 #' @param coord.df A data.frame of coordinates for spatial barcodes. The coordinates are placed in the first two columns.

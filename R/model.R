@@ -1,5 +1,5 @@
 #' @title estPropInSpots
-
+#'
 #' @description Infer cellular proportions for spatial transcriptome (ST) spots.
 #' @param sp.obj Seurat object of ST data.
 #' @param sc.obj Seurat object of single-cell (SC) data.
@@ -69,7 +69,7 @@ estPropInSpots <- function(sp.obj, sc.obj, hot.spts, sc.markers, knn = 5, interc
 }
 
 #' @title ctypesOfClusters
-
+#'
 #' @description Calculates weighted scores of cellular types across clusters based on spatial transcriptomics (ST) data and hotspot information.
 #' @param sp.obj Seurat object of ST data.
 #' @param hot.spts A data.frame containing boolean values to determine whether spots are hotspots or not.
@@ -94,7 +94,7 @@ ctypesOfClusters <- function(sp.obj, hot.spts) {
 }
 
 #' @title weightSimScore
-
+#'
 #' @description Applies weighted adjustment to similarity scores between spots and cell types based on provided adjustment weights and hotspot information.
 #' @param out.sim Matrix or data frame of similarity scores between spots and cell types.
 #' @param adj.w Weight matrix specifying adjustments for each spot and cell type combination.
@@ -130,7 +130,7 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
 }
 
 #' @title weigthNetProb
-
+#'
 #' @description Adjusts FNN predictions based on cell type proportions derived from SC and ST data, considering hotspot information.
 #' @param netx.pred Matrix or data frame of network predictions.
 #' @param sc.obj Seurat object of SC data.
@@ -161,7 +161,7 @@ weigthNetProb <- function(netx.pred, sc.obj, sp.obj, hot.spts) {
 }
 
 #' @title selectByProb
-
+#'
 #' @description Computes a similarity score matrix based on spatial and single-cell signature scores, adjusting for probabilities.
 #' @param sp.score Matrix or data frame of ST signature scores.
 #' @param sc.score Matrix or data frame of SC signature scores.
@@ -183,7 +183,7 @@ selectByProb <- function(sp.score, sc.score) {
 }
 
 #' @title featureSelelction
-
+#'
 #' @description Performs feature selection and data integration between spatial transcriptomics (ST) and single-cell (SC) data.
 #' @param sp.obj Seurat object containing ST data.
 #' @param sc.obj Seurat object containing SC data.
@@ -228,7 +228,7 @@ featureSelelction <- function(sp.obj, sc.obj, n.features, verbose = TRUE) {
 }
 
 #' @title mergeClusters
-
+#'
 #' @description Merge clusters in a Seurat object based on a maximum block size, integrating single-cell or spatial transcriptomics data.
 #' @param sp.obj Seurat object containing single-cell or spatial transcriptomics data.
 #' @param num.cells A vector of cell counts in spots.
@@ -276,7 +276,7 @@ mergeClusters <- function(sp.obj, num.cells, max.block.size = 20000) {
 }
 
 #' @title partionClusters
-
+#'
 #' @description Partition single cells into sub-clusters using a deep learning strategy based on integration of spatial transcriptomics (ST) and single-cell (SC) data.
 #' @param sp.obj Seurat object containing ST data.
 #' @param sc.obj Seurat object containing SC data.
@@ -360,7 +360,7 @@ partionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts) {
 }
 
 #' @title linearSumAssignment
-
+#'
 #' @description Assigns single cells to spatial coordinates based on similarity scores between single-cell and spatial transcriptomics (ST) data.
 #' @param sp.obj Seurat object containing ST data.
 #' @param sc.obj Seurat object containing SC data.

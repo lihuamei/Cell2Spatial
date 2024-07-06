@@ -1,5 +1,5 @@
 #' @title checkParams.runMap2SP
-
+#'
 #' @description Check the legality of input arguments.
 #' @param argg A list of input arguments.
 #' @return A boolean value: TRUE.
@@ -29,7 +29,7 @@ checkParams.runMap2SP <- function(argg) {
 }
 
 #' @title preprocessSeqData
-
+#'
 #' @description The preprocessing of single-cell (SC) data includes several steps such as down-sampling, filtering out low-quality cell types, and normalization.
 #' @param sp.obj Seurat object of ST data.
 #' @param sc.obj Seurat object of SC data.
@@ -63,7 +63,7 @@ preprocessSeqData <- function(sp.obj, sc.obj, sample.size, ctype, min.cells.of.s
 }
 
 #' @title selectMakers
-
+#'
 #' @description Select marker genes for each cell type based on single-cell (SC) data.
 #' @param sc.obj Seurat object of SC data.
 #' @param sc.markers When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.
