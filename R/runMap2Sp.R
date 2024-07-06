@@ -18,7 +18,7 @@
 #' @param select.markers Method for selecting cell-type specific markers when `sc.markers = NULL`: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.
 #' @param dist.method Measure the distance between single cells and spots, using maximum likelihood model (mle) or correlation (cor). Default: mle.
 #' @param return.type Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.
-#' @param integ.entire Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: TRUE.
+#' @param integ.entire Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: FALSE.
 #' @param n.workers Number of cores for parallel processing. Default: 4.
 #' @param verbose Show running messages or not. Default: TRUE.
 #' @return Assigned results wrapped as a Seurat or SingleCellExperiment object.
@@ -45,7 +45,7 @@ runCell2Spatial <- function(sp.obj,
                             select.markers = c("shannon", "wilcox"),
                             dist.method = c("mle", "cor"),
                             return.type = c("Seurat", "SingleCellExperiment"),
-                            integ.entire = TRUE,
+                            integ.entire = FALSE,
                             n.workers = 4,
                             verbose = TRUE) {
     options(warn = -1)
