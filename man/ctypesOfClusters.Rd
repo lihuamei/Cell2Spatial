@@ -4,8 +4,16 @@
 \alias{ctypesOfClusters}
 \title{ctypesOfClusters}
 \usage{
-ctypesOfClusters(sp.obj, st.pvals)
+ctypesOfClusters(sp.obj, hot.spts)
+}
+\arguments{
+\item{sp.obj}{Seurat object of ST data.}
+
+\item{hot.spts}{A data.frame containing boolean values to determine whether spots are hotspots or not.}
+}
+\value{
+A data frame where each row represents a cluster and each column represents a cellular type, with values indicating weighted scores.
 }
 \description{
-ctypesOfClusters
+Calculates weighted scores of cellular types across clusters based on spatial transcriptomics (ST) data and hotspot information.
 }

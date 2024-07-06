@@ -21,12 +21,10 @@ checkParams.runMap2SP <- function(argg) {
         is.numeric(argg[["quantile.threshold"]]) && argg[["quantile.threshold"]] <= 1 && argg[["quantile.threshold"]] > 0,
         is.character(argg[["select.markers"]]),
         is.character(argg[["dist.method"]]),
+        is.logical(argg[["integ.entire"]]),
         is.numeric(argg[["n.workers"]]) && argg[["n.workers"]] >= 1,
         is.logical(argg[["verbose"]])
     )
-    if (argg[["duplicated"]] && argg[["partion"]]) {
-        println("Parameters 'duplicated' and 'partion' cannot be set TRUE at the same time, reset partion = FALSE", verbose = TRUE, status = "WARN")
-    }
     return(TRUE)
 }
 

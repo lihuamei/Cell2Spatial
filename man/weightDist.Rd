@@ -4,7 +4,7 @@
 \alias{weightDist}
 \title{weightDist}
 \usage{
-weightDist(sc.obj, sp.obj, lamba, mc.cores = 4)
+weightDist(sc.obj, sp.obj, lamba, mc.cores = 4, use.entire = TRUE)
 }
 \arguments{
 \item{sc.obj}{Seurat object of SC data.}

@@ -4,12 +4,7 @@
 \alias{plotCoexistCtypes}
 \title{plotCoexistCtypes}
 \usage{
-plotCoexistCtypes(
-  j.index,
-  j.cut = 0,
-  high.ctypes = NULL,
-  cols = c("#91a28c", "white", "#8f2c37")
-)
+plotCoexistCtypes(j.index, j.cut = 0, cols = c("#91a28c", "white", "#8f2c37"))
 }
 \arguments{
 \item{j.index}{A data.frame of coexist indexes of cell-types.}

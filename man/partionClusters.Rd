@@ -4,20 +4,18 @@
 \alias{partionClusters}
 \title{partionClusters}
 \usage{
-partionClusters(sp.obj, sc.obj, n.features, num.cells)
+partionClusters(sp.obj, sc.obj, num.cells, hot.spts)
 }
 \arguments{
-\item{sp.obj}{Seurat object of ST data.}
+\item{sp.obj}{Seurat object containing ST data.}
 
-\item{sc.obj}{Seurat object of SC data.}
-
-\item{n.features}{Number of common features between SC and ST data.}
+\item{sc.obj}{Seurat object containing SC data.}
 
 \item{num.cells}{A vector of cell counts in spots.}
 }
 \value{
-A list of single-cells in each cluster.
+A list of single cells partitioned into sub-clusters.
 }
 \description{
-Partion single-cells to sub-clusters using deep learning strategy.
+Partition single cells into sub-clusters using a deep learning strategy based on integration of spatial transcriptomics (ST) and single-cell (SC) data.
 }

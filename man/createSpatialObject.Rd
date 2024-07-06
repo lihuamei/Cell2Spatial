@@ -19,6 +19,9 @@ createSpatialObject(
 
 \item{class}{Class name of the Spatial image slot. Default: SlideSeq.}
 }
+\value{
+A Seurat object for ST data.
+}
 \description{
 Create Spatial seurat object for ST data from other platforms.
 }

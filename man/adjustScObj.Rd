@@ -11,11 +11,11 @@ adjustScObj(sc.obj, st.prop, num.cells)
 
 \item{st.prop}{A data.frame containing proportions for ST data.}
 
-\item{num.cells}{A vector of number of cells for ST data.}
+\item{num.cells}{A vector of cell counts for ST spots.}
 }
 \value{
 Adjusted Seurat object of SC data.
 }
 \description{
-adjustScObj
+Adjust single-cell (SC) data by incorporating inferred proportions and cell counts for mapping to spatial transcriptomics (ST) spots
 }

@@ -4,15 +4,20 @@
 \alias{featureSelelction}
 \title{featureSelelction}
 \usage{
-featureSelelction(sp.obj, sc.obj, n.features)
+featureSelelction(sp.obj, sc.obj, n.features, verbose = TRUE)
 }
 \arguments{
-\item{sp.obj}{Seurat object of ST data.}
+\item{sp.obj}{Seurat object containing ST data.}
 
-\item{sc.obj}{Seurat object of SC data.}
+\item{sc.obj}{Seurat object containing SC data.}
 
-\item{n.features}{Common features between SC and ST data.}
+\item{n.features}{Number of features to select for integration.}
+
+\item{verbose}{Boolean indicating whether to display verbose messages during processing. Default: TRUE.}
+}
+\value{
+A list containing integrated Seurat objects for SC (\code{sc.int}) and ST (\code{st.int}) data.
 }
 \description{
-featureSelelction
+Performs feature selection and data integration between spatial transcriptomics (ST) and single-cell (SC) data.
 }

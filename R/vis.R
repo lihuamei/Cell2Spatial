@@ -63,12 +63,11 @@ plotSc2Spatial <- function(sp.obj, sce, tar.ctypes = NULL, pt.size = 1.0, colors
 #' @description Showing coexist indexes of cell-types.
 #' @param j.index A data.frame of coexist indexes of cell-types.
 #' @param j.cut J-index value below than the specified cutoff will be set to zero. Default: 0.
-#' @param high.ctypes
 #' @param cols A vector colors with names, which contains three colors, representing low, medium, and high. Default: c("#91a28c", "white", "#8f2c37").
 #' @return ggplot object.
 #' @export plotCoexistCtypes
 
-plotCoexistCtypes <- function(j.index, j.cut = 0, high.ctypes = NULL, cols = c("#91a28c", "white", "#8f2c37")) {
+plotCoexistCtypes <- function(j.index, j.cut = 0, cols = c("#91a28c", "white", "#8f2c37")) {
     cols <- cols[1:3]
     j.index[j.index < j.cut] <- 0
 

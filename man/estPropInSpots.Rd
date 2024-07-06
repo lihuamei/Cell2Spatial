@@ -7,32 +7,31 @@
 estPropInSpots(
   sp.obj,
   sc.obj,
-  st.pvals,
+  hot.spts,
   sc.markers,
-  pval.cut = 0.05,
   knn = 5,
   intercept = TRUE,
   chunk.size = 10000
 )
 }
 \arguments{
-\item{sp.obj}{Seurat object of spatial transcriptome (ST) data.}
+\item{sp.obj}{Seurat object of ST data.}
 
 \item{sc.obj}{Seurat object of single-cell (SC) data.}
 
-\item{st.pvals}{A data.frame containing p-values to determine whether cell types are significantly present in a spot or not.}
+\item{hot.spts}{A data.frame containing boolean values to determine whether spots are hotspots or not.}
 
 \item{sc.markers}{A list of markers of cell types.}
 
-\item{pval.cut}{significant cutoff value. Default: 0.05}
-
 \item{knn}{K nearest cells used for estimating cellular proportions. Default: 5.}
 
-\item{intercept}{Using intercept or not for robust linear regression. Default: TRUE.}
+\item{intercept}{Boolean indicating whether to use intercept for robust linear regression. Default: TRUE.}
+
+\item{chunk.size}{Chunk size to determine downsampled ST data for estimating proportions. Default: 10000.}
 }
 \value{
-A data frame of cellular fractions in each spot.
+A data.frame of estimated cellular proportions in spots.
 }
 \description{
-Infer whether a cell type belongs to a specific cluster.
+Infer cellular proportions for spatial transcriptome (ST) spots.
 }

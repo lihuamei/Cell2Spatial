@@ -8,24 +8,24 @@ estCellPerSpots(
   sp.obj,
   max.cells = 10,
   fix.cells.in.spot = NULL,
-  quantile.cut = 0.99,
+  quantile.cut = 0.999,
   num.genes = 2000
 )
 }
 \arguments{
-\item{sp.obj}{Seurat object of spatial transcriptome (ST) data.}
+\item{sp.obj}{Seurat object of spatial transcriptomics (ST) data.}
 
 \item{max.cells}{Maximum number of cells in Spots. Default: 10 (10x Genomics).}
 
-\item{fix.cells.in.spot}{Fixed number of cells assigned to a spot. Default: NULL.}
+\item{fix.cells.in.spot}{Fixed number of cells assigned to each spot. Default: NULL.}
 
 \item{quantile.cut}{Spots with a number of UMIs greater than the quantile cutoff are set as a reference. Default: 0.99.}
 
-\item{num.genes}{Set the number of stable genes. Default: 2000.}
+\item{num.genes}{Number of stable genes used in the estimation. Default: 2000.}
 }
 \value{
 A vector of estimated cells per spot.
 }
 \description{
-Estimate number of cells per spot.
+Estimate the number of cells per spot using regression method.
 }

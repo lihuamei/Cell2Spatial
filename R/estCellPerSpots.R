@@ -61,12 +61,13 @@ adjustScObj <- function(sc.obj, st.prop, num.cells) {
                 GetAssayData(., slot = "count") %>%
                 as.data.frame()
             diff.cnt <- ctype.cnt[xx] - length(cells.tmp)
-            rand.mat <- count.mat[, sample(names(cells.tmp), diff.cnt, replace = TRUE)] %>% as.matrix()
+            cells.rand <- sample(names(cells.tmp), diff.cnt, replace = TRUE)
+            rand.mat <- count.mat[, cells.rand] %>% as.matrix()
 
             noise <- matrix(rnorm(n = length(rand.mat), mean = 0, sd = 1), nrow = nrow(rand.mat), ncol = ncol(rand.mat))
             rand.mat <- round(rand.mat + noise)
             rand.mat[rand.mat < 0] <- 0
-            colnames(rand.mat) <- paste0(sprintf("Pseudo_%s", xx), "_", 1:diff.cnt)
+            colnames(rand.mat) <- paste0(sprintf("Pseudo_%s", cells.rand), "_XYZ", 1:diff.cnt)
             mat <- cbind.data.frame(count.mat, rand.mat)
         } else {
             cells.sample <- sample(cells.tmp, ctype.cnt[xx], replace = rep.bool) %>% names()

@@ -18,17 +18,17 @@ preprocessSeqData(
 
 \item{sc.obj}{Seurat object of SC data.}
 
-\item{sample.size}{Down-sampling size for each subset of SC data.}
+\item{sample.size}{Proportion for downsampling single cells of each cell type.}
 
-\item{ctype}{Ident information of SC data in the column name of meta.data slot.}
+\item{ctype}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
 
-\item{min.cells.of.subset}{Minimum cell counts of each subset source from SC data. Default: 5.}
+\item{min.cells.of.subset}{Include cells detected in at least one cell type in the SC data. Default: 5.}
 
-\item{verbose}{Showing running mesaeg or not. Default: TRUE.}
+\item{verbose}{Boolean indicating whether to show running messages. Default: TRUE.}
 }
 \value{
-Seurat object of preprocessed single cell data.
+A list of Seurat objects of preprocessed data.
 }
 \description{
-Preprocessing of single-cell (SC) data involves a series of steps.
+The preprocessing of single-cell (SC) data includes several steps such as down-sampling, filtering out low-quality cell types, and normalization.
 }

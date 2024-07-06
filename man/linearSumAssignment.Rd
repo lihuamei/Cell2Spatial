@@ -8,27 +8,30 @@ linearSumAssignment(
   sp.obj,
   sc.obj,
   out.sim,
+  adj.w,
   num.cells,
-  n.features,
-  partion = TRUE
+  hot.spts,
+  partion
 )
 }
 \arguments{
-\item{sp.obj}{Seurat object of ST data.}
+\item{sp.obj}{Seurat object containing ST data.}
 
-\item{sc.obj}{Seurat object of SC data.}
+\item{sc.obj}{Seurat object containing SC data.}
 
-\item{out.sim}{Similarity matrix between single-cells and spots.}
+\item{out.sim}{Similarity matrix between single cells and spots.}
 
-\item{num.cells}{A vector of cell count per spot projected to spots. Default: 10.}
+\item{adj.w}{Weight matrix for adjusting similarity scores.}
 
-\item{n.features}{Number of common features between SC and ST data.}
+\item{num.cells}{A vector indicating the cell count per spot projected to spots.}
 
-\item{partion}{Split into sub-modules mapped to spatial positions. Default: TRUE.}
+\item{hot.spts}{Data frame indicating hotspot presence in spots and cell types.}
+
+\item{partion}{Logical indicating whether to split into sub-modules mapped to spatial positions.}
 }
 \value{
 A list of assigned cells corresponding to spots.
 }
 \description{
-Assign single-cells to spatial coordinates.
+Assigns single cells to spatial coordinates based on similarity scores between single-cell and spatial transcriptomics (ST) data.
 }

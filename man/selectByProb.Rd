@@ -4,11 +4,16 @@
 \alias{selectByProb}
 \title{selectByProb}
 \usage{
-selectByProb(sp.score, sc.score, adj.w)
+selectByProb(sp.score, sc.score)
+}
+\arguments{
+\item{sp.score}{Matrix or data frame of ST signature scores.}
+
+\item{sc.score}{Matrix or data frame of SC signature scores.}
 }
 \value{
-Similarity matrix.
+Similarity matrix where each row represents a spatial spot and each column represents a single-cell, adjusted based on computed probabilities.
 }
 \description{
-Measuring the similarity distances using probability model.
+Computes a similarity score matrix based on spatial and single-cell signature scores, adjusting for probabilities.
 }

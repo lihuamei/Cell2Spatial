@@ -7,17 +7,17 @@
 weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
 }
 \arguments{
-\item{netx.pred}{A probability matrix output from FNN model.}
+\item{netx.pred}{Matrix or data frame of network predictions.}
 
 \item{sc.obj}{Seurat object of SC data.}
 
-\item{sp.obj}{Seurt object of ST data.}
+\item{sp.obj}{Seurat object of ST data.}
 
-\item{hot.spts}{Boolean value matrix of hot spots.}
+\item{hot.spts}{A data frame indicating hotspot presence in spots and cell types.}
 }
 \value{
-Weighetd probability matrix.
+Adjusted network predictions matrix where weights are applied based on cell type proportions and hotspot information.
 }
 \description{
-Weighted network probablity using the boolean value of hot spots.
+Adjusts FNN predictions based on cell type proportions derived from SC and ST data, considering hotspot information.
 }

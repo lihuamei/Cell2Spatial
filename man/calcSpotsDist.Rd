@@ -8,6 +8,8 @@ calcSpotsDist(sp.obj, knn = 5)
 }
 \arguments{
 \item{sp.obj}{Spatial seurat object data.}
+
+\item{knn}{Number of nearest cells used for estimating cellular proportions. Default: 5.}
 }
 \value{
 A list distance relationship.

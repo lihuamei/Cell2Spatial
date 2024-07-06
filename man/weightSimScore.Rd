@@ -4,22 +4,22 @@
 \alias{weightSimScore}
 \title{weightSimScore}
 \usage{
-weightSimScore(out.sim, adj.w, spot.name, cell.names, hot.spts)
+weightSimScore(out.sim, adj.w, spot.name, cell.names, hot.spts = NULL)
 }
 \arguments{
-\item{out.sim}{A subset of similariy scores between SC and ST.}
+\item{out.sim}{Matrix or data frame of similarity scores between spots and cell types.}
 
-\item{adj.w}{A weighted matrix infered from distance. Rows represent spot names, and cloumns are cell types.}
+\item{adj.w}{Weight matrix specifying adjustments for each spot and cell type combination.}
 
-\item{spot.name}{Target spot names.}
+\item{spot.name}{Vector or list of spot names.}
 
-\item{cell.names}{Target single-cell names.}
+\item{cell.names}{Vector or list of cell type names.}
 
-\item{hot.spts}{A Boolean value matrix indicates whether the hot spots belong to a specific cell type or not.}
+\item{hot.spts}{A data frame indicating hotspot presence in spots and cell types.}
 }
 \value{
-Weighted similarity matrix.
+Weighted similarity scores matrix where adjustments are applied based on provided weights and hotspot information.
 }
 \description{
-Weighted similarity score based on spatial distances.
+Applies weighted adjustment to similarity scores between spots and cell types based on provided adjustment weights and hotspot information.
 }

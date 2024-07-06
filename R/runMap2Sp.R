@@ -18,10 +18,11 @@
 #' @param select.markers Method for selecting cell-type specific markers when `sc.markers = NULL`: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.
 #' @param dist.method Measure the distance between single cells and spots, using maximum likelihood model (mle) or correlation (cor). Default: mle.
 #' @param return.type Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.
+#' @param integ.entire Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: TRUE.
 #' @param n.workers Number of cores for parallel processing. Default: 4.
 #' @param verbose Show running messages or not. Default: TRUE.
 #' @return Assigned results wrapped as a Seurat or SingleCellExperiment object.
-#' @export runMap2SP
+#' @export runCell2Spatial
 #'
 #' @examples
 #' sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
@@ -44,6 +45,7 @@ runCell2Spatial <- function(sp.obj,
                             select.markers = c("shannon", "wilcox"),
                             dist.method = c("mle", "cor"),
                             return.type = c("Seurat", "SingleCellExperiment"),
+                            integ.entire = TRUE,
                             n.workers = 4,
                             verbose = TRUE) {
     options(warn = -1)
@@ -72,12 +74,16 @@ runCell2Spatial <- function(sp.obj,
     )
     keep.spots <- rownames(hot.spts)[rowSums(hot.spts) > 0]
     println("Clustering spots for ST data and estimating the cell counts per spot", verbose = verbose)
-    sp.obj <- findClustersForSpData(obj.lst$ST, res = res, verbose = FALSE)
+    suppressWarnings({
+        sp.obj <- findClustersForSpData(obj.lst$ST, res = res, verbose = FALSE)
+    })
     num.cells <- estCellPerSpots(sp.obj, max.cells.in.spot, fix.cells.in.spot, quantile.cut = quantile.threshold)
 
     println("Weighting the distance between SC and ST data...", verbose = verbose)
     lamba <- median(num.cells[keep.spots])
-    adj.w <- weightDist(obj.lst$SC, sp.obj, lamba, mc.cores = n.workers)
+    suppressWarnings({
+        adj.w <- weightDist(obj.lst$SC, sp.obj, lamba, mc.cores = n.workers, use.entire = integ.entire)
+    })
 
     sc.obj <- obj.lst$SC
     sp.obj <- subset(sp.obj, cells = keep.spots)
@@ -98,7 +104,9 @@ runCell2Spatial <- function(sp.obj,
         }
     )
     println(sprintf("Assigning %g single-cells to spots and generating spatial coordinates", sum(num.cells)))
-    out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, partion)
+    suppressWarnings({
+        out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, partion)
+    })
     sce <- assignSCcords(sp.obj, sc.obj, out.sc, lapply(out.sc, length), match.arg(return.type), n.workers = n.workers)
     println("Finished!", verbose = verbose)
     return(sce)

@@ -26,36 +26,6 @@ multipleProcess <- function(n.workers = 4) {
     future::plan("multicore", workers = n.workers)
 }
 
-#' @tilte sampleBulkProfiles
-
-#' @description Down-sampling bulk profiles for deconvoluting.
-#' @param base.ref Base matrix.
-#' @param nperm Number of permutations. Default: 30.
-#' @return A list of generated bulk profiles.
-
-sampleBulkProfiles <- function(sp.obj, base.ref, nperm = 100) {
-    sp.lst <- split(names(Idents(sp.obj)), as.vector(Idents(sp.obj)))
-    sp.expr <- GetAssayData(sp.obj, slot = "data", assay = "SCT")[rownames(base.ref), ]
-    bulk.profiles <- future.apply::future_lapply(1:nperm, function(jdx) {
-        expr.dat <- lapply(sp.lst, function(idx) {
-            sample.spots <- sample(idx, ceiling(length(idx) * 0.75))
-            sp.expr.sub <- sp.expr[, sample.spots] %>%
-                {
-                    10^.
-                } %>%
-                as.data.frame(.)
-        }) %>%
-            do.call(cbind, .) %>%
-            rowMeans(.) %>%
-            {
-                log10(.)
-            }
-    }, future.seed = TRUE) %>%
-        do.call(cbind, .) %>%
-        as.data.frame()
-    return(bulk.profiles)
-}
-
 #' @title downSamplSeurat
 
 #' @description Down-sampling for Seurat obeject.
@@ -108,9 +78,10 @@ findScMarkers <- function(sc.obj, group.size, select.markers = c("shannon", "wil
                 .[lapply(., length) > 0]
         },
         shannon = {
-            X <- {
-                AverageExpression(sc.obj, assay = "SCT")$SCT + 1e-2
-            } # %>% { log(1 + .) }
+            X <-
+                {
+                    AverageExpression(sc.obj, assay = "SCT")$SCT + 1e-2
+                } %>% as.matrix()
             nrep.sns <- dim(X)[2]
             X.norm <- X / rowSums(X)
             X.mu <- rowMeans(X.norm)
@@ -187,6 +158,7 @@ coExistIndex <- function(sce, min.cells = 0) {
 #' @param counts UMI count matrix, rows are genes and columns are barcodes.
 #' @param coord.df A data.frame of coordinates for spatial barcodes. The coordinates are placed in the first two columns.
 #' @param class Class name of the Spatial image slot. Default: SlideSeq.
+#' @return A Seurat object for ST data.
 
 createSpatialObject <- function(counts, coord.df, coord.label = c("x", "y"), meta.data = NULL, class = "SlideSeq") {
     ovp.spots <- intersect(colnames(counts), rownames(coord.df))

@@ -17,19 +17,18 @@ psedoSpotExprUseSC <- function(sc.obj, sp.obj, pseu.cnt = 200, lamba = 5, mc.cor
     count.mat <- GetAssayData(sc.obj, slot = "count") %>% as.matrix()
     cell.lst <- split(colnames(sc.obj), Idents(sc.obj) %>% as.vector())
     syn.spot <- parallel::mclapply(ctypes, function(ct) {
-        rand.mat <- lapply(1:pseu.cnt, function(xx) {
+        syn.spot <- lapply(1:pseu.cnt, function(xx) {
             ct.tmp <- sample(cell.lst[[ct]], lamba, replace = TRUE)
             if (length(ct.tmp) > 1) {
-                rowSums(count.mat[, ct.tmp])
+                rowMeans(count.mat[, ct.tmp]) %>% round(.)
             } else {
                 count.mat[, ct.tmp]
             }
         }) %>%
             do.call(cbind, .) %>%
             as.data.frame()
-        syn.spot <- DropletUtils::downsampleMatrix(rand.mat, prop = med.umis / colSums(rand.mat))
         colnames(syn.spot) <- paste0(ct, "_pseu", 1:ncol(syn.spot))
-        syn.spot
+        syn.spot %>% as.data.frame()
     }, mc.cores = mc.cores) %>% do.call(cbind, .)
     meta.data <- data.frame(CellType = gsub("_pseu.*", "", colnames(syn.spot))) %>% `rownames<-`(colnames(syn.spot))
     syn.spot <- CreateSeuratObject(count = syn.spot, meta.data = meta.data)
@@ -133,6 +132,32 @@ adjcentScOfSP <- function(obj) {
     return(adj.df)
 }
 
+#' @title adjcentScOfSPGlobal
+
+#' @description Generating distance matrix between ST spots and SC cells.
+#' @param obj Integrated Seurat object.
+#' @return A matrix of distance weights between ST and SC.
+
+adjcentScOfSPGlobal <- function(obj) {
+    umap.coord <- FetchData(obj, vars = c("UMAP_1", "UMAP_2", "Batches"))
+    umap.sp <- subset(umap.coord, Batches == "ST")[, 1:2]
+    umap.sc <- subset(umap.coord, Batches == "SC")[, 1:2]
+    adj.df <- future.apply::future_lapply(1:nrow(umap.sp), function(idx) {
+        xx <- umap.sp[idx, ] %>%
+            unlist() %>%
+            as.vector()
+        res.dist <- apply(umap.sc, 1, function(yy) {
+            sqrt(sum((xx - yy)^2))
+        })
+        res.dist <- (max(res.dist) - res.dist) / (max(res.dist) - min(res.dist))
+    }, future.seed = TRUE) %>%
+        do.call(rbind, .) %>%
+        as.data.frame() %>%
+        `rownames<-`(rownames(umap.sp))
+    adj.df <- as.matrix(adj.df)
+    return(adj.df)
+}
+
 #' @title weightDist
 
 #' @description Weight distance between SC and ST data.
@@ -143,21 +168,26 @@ adjcentScOfSP <- function(obj) {
 #' @param mc.cores Number of cores for parallel running. Default: 4
 #' @return A matrix of weighted distance matrix. Rows represent spot clusters and columns are cell types.
 
-weightDist <- function(sc.obj, sp.obj, lamba, mc.cores = 4) {
-    sc.syn <- psedoSpotExprUseSC(sc.obj, sp.obj, pseu.cnt = 200, lamba = lamba, mc.cores = mc.cores)
-    sp.syn <- downSamplSeurat(sp.obj, cnt = 200)
-    adj.df <- integDataBySeurat(sp.syn, sc.syn, verbose = FALSE) %>%
-        adjcentScOfSP(.) %>%
-        as.data.frame(.) %>%
-        mutate(CLUSTER = Idents(sp.obj)[rownames(.)]) %>%
-        group_by(CLUSTER) %>%
-        summarise(across(all_of(levels(sc.obj)), ~ mean(sort(.x, decreasing = TRUE)[1:10], na.rm = TRUE))) %>%
-        data.frame() %>%
-        `rownames<-`(.[, 1]) %>%
-        {
-            .[, -1]
-        } %>%
-        `colnames<-`(levels(sc.obj))
-    message("")
+weightDist <- function(sc.obj, sp.obj, lamba, mc.cores = 4, use.entire = TRUE) {
+    if (use.entire) {
+        adj.df <- integDataBySeurat(sp.obj, sc.obj, verbose = FALSE) %>%
+            adjcentScOfSPGlobal(.)
+    } else {
+        sc.syn <- psedoSpotExprUseSC(sc.obj, sp.obj, pseu.cnt = 200, lamba = lamba, mc.cores = mc.cores)
+        sp.syn <- downSamplSeurat(sp.obj, cnt = 200)
+        adj.df <- integDataBySeurat(sp.syn, sc.syn, verbose = FALSE) %>%
+            adjcentScOfSP(.) %>%
+            as.data.frame(.) %>%
+            mutate(CLUSTER = Idents(sp.obj)[rownames(.)]) %>%
+            group_by(CLUSTER) %>%
+            summarise(across(all_of(levels(sc.obj)), ~ mean(sort(.x, decreasing = TRUE)[1:10], na.rm = TRUE))) %>%
+            data.frame() %>%
+            `rownames<-`(.[, 1]) %>%
+            {
+                .[, -1]
+            } %>%
+            `colnames<-`(levels(sc.obj))
+        message("")
+    }
     return(adj.df)
 }
