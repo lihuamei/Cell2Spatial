@@ -298,6 +298,7 @@ partionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts) {
     sc.embeddings <- sc.int@reductions$pca@cell.embeddings[, 1:30]
     labels <- mergeClusters(sp.obj, num.cells)
     Idents(sp.obj) <- labels
+    levels(sp.obj) <- unique(labels) %>% stringr::str_sort(., numeric = TRUE)
     netx.pred <- runNetModel(sc.embeddings, sp.embeddings, as.integer(labels), epochs = 1000) %>%
         `rownames<-`(colnames(sc.int)) %>%
         `colnames<-`(levels(sp.obj))
