@@ -84,7 +84,6 @@ runCell2Spatial <- function(sp.obj,
     suppressWarnings({
         adj.w <- weightDist(obj.lst$SC, sp.obj, lamba, mc.cores = n.workers, use.entire = integ.entire)
     })
-
     sc.obj <- obj.lst$SC
     sp.obj <- subset(sp.obj, cells = keep.spots)
     hot.spts <- hot.spts[keep.spots, ]

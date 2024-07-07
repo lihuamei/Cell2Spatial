@@ -107,7 +107,7 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
     spot.name <- as.vector(spot.name) %>% `names<-`(names(spot.name))
     cell.names <- as.vector(cell.names) %>% `names<-`(names(cell.names))
     out.sim.sub <- out.sim[names(spot.name), names(cell.names)]
-    if (ncol(adj.w) != length(unique(cell.names))) {
+    if (ncol(adj.w) != ncol(hot.spts)) {
         adj.w.sub <- adj.w[names(spot.name), gsub("Pseudo_|_XYZ\\d+", "", names(cell.names))] %>% `colnames<-`(names(cell.names))
     } else {
         adj.w.sub <- adj.w[spot.name, cell.names] %>%
@@ -124,7 +124,7 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
             `colnames<-`(names(cell.names)) %>%
             t()
         idxes <- which(hot.spts.flat == FALSE)
-        out.sim.w[idxes] <- 0 # out.sim.w[idxes] - 1
+        out.sim.w[idxes] <- out.sim.w[idxes] - 1
     }
     return(out.sim.w)
 }
