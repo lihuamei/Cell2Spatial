@@ -4,13 +4,12 @@
 #' @param sp.obj Seurat object of spatial transcriptomics (ST) data.
 #' @param max.cells Maximum number of cells in Spots. Default: 10 (10x Genomics).
 #' @param fix.cells.in.spot Fixed number of cells assigned to each spot. Default: NULL.
-#' @param quantile.cut Spots with a number of UMIs greater than the quantile cutoff are set as a reference. Default: 0.99.
+#' @param quantile.cut Spots with a number of UMIs greater than the quantile cutoff are set as a reference. Default: 0.95.
 #' @param num.genes Number of stable genes used in the estimation. Default: 2000.
 #' @return A vector of estimated cells per spot.
 #' @export estCellPerSpots
 
-estCellPerSpots <- function(sp.obj, max.cells = 10, fix.cells.in.spot = NULL, quantile.cut = 0.999, num.genes = 2000) {
-    options(warn = -1)
+estCellPerSpots <- function(sp.obj, max.cells = 10, fix.cells.in.spot = NULL, quantile.cut = 0.95, num.genes = 1000) {
     if (!is.null(fix.cells.in.spot)) {
         pred.cnt <- rep(fix.cells.in.spot, ncol(sp.obj)) %>% `names<-`(colnames(sp.obj))
     } else {

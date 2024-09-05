@@ -10,7 +10,7 @@
 #' @param group.size Specify the marker size for each subset derived from single-cell data. Default: 30.
 #' @param resolution Resolution for clustering ST spots. Default: 0.8.
 #' @param knn Utilize the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.
-#' @param partition Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: TRUE.
+#' @param partition Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: FALSE.
 #' @param max.cells.in.spot Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set `max.cells.in.spot` to 1.
 #' @param fix.cells.in.spot Fixed number of cells assigned to a spot. Default: NULL.
 #' @param signature.scoring.method Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.
@@ -39,7 +39,7 @@ runCell2Spatial <- function(sp.obj,
                             group.size = 100,
                             resolution = 0.8,
                             knn = 5,
-                            partition = TRUE,
+                            partition = FALSE,
                             max.cells.in.spot = 10,
                             fix.cells.in.spot = NULL,
                             signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
@@ -84,7 +84,7 @@ runCell2Spatial <- function(sp.obj,
     suppressWarnings({
         sp.obj <- findClustersForSpData(sp.obj, res = resolution, verbose = FALSE)
     })
-    num.cells <- estCellPerSpots(sp.obj, max.cells.in.spot, fix.cells.in.spot, quantile.cut = quantile.threshold)
+    num.cells <- estCellPerSpots(sp.obj, max.cells.in.spot, fix.cells.in.spot)
 
     println("Weighting the distance between SC and ST data...", verbose = verbose)
     lamba <- median(num.cells[keep.spots])
