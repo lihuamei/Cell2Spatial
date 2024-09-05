@@ -410,7 +410,6 @@ linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.s
         sim.file <- file.path(tmp.dir, sprintf("sim_%s.xls", cls))
         num.file <- file.path(tmp.dir, sprintf("num_%s.xls", cls))
         data.table::fwrite(as.data.frame(out.sim.sub) * (-1), file = sim.file)
-        # data.table::fwrite(as.data.frame(out.sim.sub), file = sim.file)
         data.table::fwrite(as.data.frame(num.cells[colnames(out.sim.sub)]), file = num.file)
 
         python.script <- system.file("R/solve.py", package = "Cell2Spatial")
