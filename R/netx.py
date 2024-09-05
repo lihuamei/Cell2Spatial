@@ -44,7 +44,7 @@ def trainModel(X, y_encoded, epochs = 100):
         checkpoint = ModelCheckpoint(f'best_model_fold_{fold}.h5', monitor='val_accuracy', save_best_only=True, mode='max',verbose=1)
         reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=1e-6)
         early_stop = EarlyStopping(monitor='val_accuracy', patience=10, restore_best_weights=True)
-        model.fit(X_train, y_train, epochs=epochs, batch_size=32, validation_data=(X_test, y_test), callbacks=[checkpoint, reduce_lr, early_stop])
+        model.fit(X_train, y_train, epochs=epochs, batch_size=32, validation_data=(X_test, y_test), callbacks=[checkpoint, reduce_lr, early_stop], verbose=1)
 
         scores = model.evaluate(X_test, y_test)
         accuracy = scores[1]

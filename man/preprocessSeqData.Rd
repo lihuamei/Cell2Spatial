@@ -8,7 +8,7 @@ preprocessSeqData(
   sp.obj,
   sc.obj,
   sample.size,
-  ctype,
+  cell.type.column,
   min.cells.of.subset = 5,
   verbose = TRUE
 )
@@ -20,7 +20,7 @@ preprocessSeqData(
 
 \item{sample.size}{Proportion for downsampling single cells of each cell type.}
 
-\item{ctype}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
+\item{cell.type.column}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
 
 \item{min.cells.of.subset}{Include cells detected in at least one cell type in the SC data. Default: 5.}
 

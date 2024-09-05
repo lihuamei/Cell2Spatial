@@ -17,18 +17,20 @@ estCellPerSpots <- function(sp.obj, max.cells = 10, fix.cells.in.spot = NULL, qu
         if (max.cells == 1) {
             pred.cnt <- rep(1, ncol(sp.obj)) %>% `names<-`(colnames(sp.obj))
         } else {
-            count.mat <- GetAssayData(sp.obj, slot = "count", assay = "Spatial") %>% as.data.frame()
-            count.mat <- count.mat[!grepl("^MT|^RP[SL]", rownames(count.mat) %>% toupper(.)), ]
-            umi.count <- rowMeans(count.mat)
-            count.mat <- count.mat[umi.count > quantile(umi.count, 0.1), ]
-            rank.mat <- apply(count.mat, 2, rank)
-            rank.sd <- apply(rank.mat, 1, sd)
-            genes <- rank.sd[order(rank.sd)][1:num.genes] %>% names()
-            count.mat <- count.mat[genes, ]
+            DefaultAssay(sp.obj) <- "Spatial"
+            keep.genes <- FindVariableFeatures(sp.obj, nfeatures = min(nrow(sp.obj), 5000), verbose = FALSE) %>% VariableFeatures(.)
+            count.mat <- GetAssayData(sp.obj[keep.genes, ], slot = "count", assay = "Spatial") %>% as.data.frame()
+            cor1 <- apply(count.mat, 1, function(xx) cor(sp.obj$nCount_Spatial, xx, method = "spearman"))
+            cor2 <- apply(count.mat, 1, function(xx) cor(sp.obj$nFeature_Spatial, xx, method = "spearman"))
+            cor.bak <- cor1 * cor2
+            cor.bak <- cor.bak[!is.na(cor.bak)]
+            cor.bak <- cor.bak[order(-cor.bak)]
+            genes <- names(cor.bak)[1:num.genes]
+
             cnt.sum <- colSums(count.mat)
             ref.cut <- quantile(cnt.sum, quantile.cut)
             ref.df <- rowMeans(count.mat[, which(cnt.sum >= ref.cut), drop = FALSE])
-            pred.cnt <- apply(count.mat, 2, function(gg) ceiling(coef(MASS::rlm(gg ~ ref.df - 1)) * max.cells))
+            pred.cnt <- apply(count.mat, 2, function(gg) ceiling(coef(MASS::rlm(gg ~ ref.df - 1), maxit = 100) * max.cells))
             pred.cnt[pred.cnt <= 0] <- 1
             pred.cnt[pred.cnt > max.cells] <- max.cells
         }
@@ -71,7 +73,7 @@ adjustScObj <- function(sc.obj, st.prop, num.cells) {
             mat <- cbind.data.frame(count.mat, rand.mat)
         } else {
             cells.sample <- sample(cells.tmp, ctype.cnt[xx], replace = rep.bool) %>% names()
-            mat <- GetAssayData(sc.obj, slot = "count")[, cells.sample] %>% as.data.frame()
+            mat <- GetAssayData(sc.obj, slot = "count")[, cells.sample, drop = FALSE] %>% as.data.frame()
         }
         return(list(EXPR = mat, CT = rep(xx, ncol(mat))))
     }, future.seed = TRUE)

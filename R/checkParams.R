@@ -8,20 +8,24 @@ checkParams.runMap2SP <- function(argg) {
     stopifnot(
         is(argg[["sp.obj"]], "Seurat"),
         is(argg[["sc.obj"]], "Seurat"),
-        is.character(argg[["ctype"]]),
+        is.character(argg[["cell.type.column"]]),
+        if (!is.null(argg[["sample.size"]])) is.numeric(argg[["sample.size"]]) && argg[["sample.size"]] > 0 else TRUE,
         if (!is.null(argg[["sc.markers"]])) is(argg[["sc.markers"]], "list") else TRUE,
+        is.character(argg[["marker.selection.method"]]),
         is.numeric(argg[["group.size"]]) && argg[["group.size"]] >= 5,
-        is.logical(argg[["partion"]]),
+        is.numeric(argg[["resolution"]]) && argg[["resolution"]] > 0,
+        is.numeric(argg[["knn"]]) && argg[["knn"]] >= 1,
+        is.logical(argg[["partition"]]),
         if (!is.null(argg[["max.cells.in.spot"]])) is.numeric(argg[["max.cells.in.spot"]]) && argg[["max.cells.in.spot"]] > 0 else TRUE,
         if (!is.null(argg[["fix.cells.in.spot"]])) is.numeric(argg[["fix.cells.in.spot"]]) && argg[["fix.cells.in.spot"]] > 0 else TRUE,
-        is.numeric(argg[["knn"]]) && argg[["knn"]] >= 1,
-        if (!is.null(argg[["sample.size"]])) is.numeric(argg[["sample.size"]]) && argg[["sample.size"]] > 0 else TRUE,
-        is.character(argg[["detect.hotspot.method"]]),
-        is.numeric(argg[["p.value.threshold"]]) && argg[["p.value.threshold"]] <= 1 && argg[["p.value.threshold"]] > 0,
-        is.numeric(argg[["quantile.threshold"]]) && argg[["quantile.threshold"]] <= 1 && argg[["quantile.threshold"]] > 0,
-        is.character(argg[["select.markers"]]),
+        is.character(argg[["signature.scoring.method"]]),
+        is.character(argg[["hotspot.detection.method"]]),
+        is.numeric(argg[["hotspot.detection.threshold"]]) && argg[["hotspot.detection.threshold"]] <= 1 && argg[["hotspot.detection.threshold"]] > 0,
+        is.logical(argg[["integ.entire.dataset"]]),
+        is.character(argg[["feature.based"]]),
         is.character(argg[["dist.method"]]),
-        is.logical(argg[["integ.entire"]]),
+        is.logical(argg[["hclust"]]),
+        is.character(argg[["output.type"]]),
         is.numeric(argg[["n.workers"]]) && argg[["n.workers"]] >= 1,
         is.logical(argg[["verbose"]])
     )
@@ -34,12 +38,12 @@ checkParams.runMap2SP <- function(argg) {
 #' @param sp.obj Seurat object of ST data.
 #' @param sc.obj Seurat object of SC data.
 #' @param sample.size Proportion for downsampling single cells of each cell type.
-#' @param ctype Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.
+#' @param cell.type.column Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.
 #' @param min.cells.of.subset Include cells detected in at least one cell type in the SC data. Default: 5.
 #' @param verbose Boolean indicating whether to show running messages. Default: TRUE.
 #' @return A list of Seurat objects of preprocessed data.
 
-preprocessSeqData <- function(sp.obj, sc.obj, sample.size, ctype, min.cells.of.subset = 5, verbose = TRUE) {
+preprocessSeqData <- function(sp.obj, sc.obj, sample.size, cell.type.column, min.cells.of.subset = 5, verbose = TRUE) {
     if (!is.null(sample.size)) {
         if (sample.size > 1) {
             sc.obj <- downSamplSeurat(sc.obj, cnt = sample.size)
@@ -47,7 +51,7 @@ preprocessSeqData <- function(sp.obj, sc.obj, sample.size, ctype, min.cells.of.s
             sc.obj <- downSamplSeurat(sc.obj, percent = sample.size)
         }
     }
-    if (ctype != "idents") Idents(sc.obj) <- sc.obj@meta.data[, ctype]
+    if (cell.type.column != "idents") Idents(sc.obj) <- sc.obj@meta.data[, cell.type.column]
     levels(sc.obj) <- intersect(levels(sc.obj), unique(Idents(sc.obj) %>% as.vector()))
     cell.cnts <- table(Idents(sc.obj))
     if (sum(cell.cnts < min.cells.of.subset)) {
@@ -59,7 +63,9 @@ preprocessSeqData <- function(sp.obj, sc.obj, sample.size, ctype, min.cells.of.s
     ovp.genes <- intersect(rownames(sc.obj), rownames(sp.obj))
     sc.obj <- sc.obj[ovp.genes, ] %>% SCTransform(., verbose = verbose)
     sp.obj <- sp.obj[ovp.genes, ] %>% SCTransform(., verbose = verbose, assay = "Spatial")
-    return(list(SC = sc.obj, ST = sp.obj))
+
+    ovp.genes <- intersect(rownames(sc.obj), rownames(sp.obj))
+    return(list(SC = sc.obj[ovp.genes, ], ST = sp.obj[ovp.genes, ]))
 }
 
 #' @title selectMakers

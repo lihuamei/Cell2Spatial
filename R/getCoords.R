@@ -69,12 +69,12 @@ getRandomCords <- function(sp.coord, num.cells, seed = 123456, n.workers = 4) {
 #' @param sc.obj Seurat object of single-cell data.
 #' @param out.sc A list of ordered single-cells correspond to spots.
 #' @param num.cells A list of number of cells for mapping to spot.
-#' @param return.type Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.
+#' @param output.type Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.
 #' @param n.workers  Number of cores for parallel processing. Default: 4.
 #' @return Seurat or SingleCellExperiment object for mapped results.
 #' @export assignSCcords
 
-assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, return.format = "Seurat") {
+assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, output.format = "Seurat") {
     sp.cords <- GetTissueCoordinates(sp.obj) %>% .[intersect(rownames(.), names(out.sc)), 1:2]
     sp.obj <- sp.obj[, rownames(sp.cords)]
     out.sc <- out.sc[rownames(sp.cords)]
@@ -100,7 +100,7 @@ assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, retu
     count.CT <- as(count.sc[, map.cords$Cell], "sparseMatrix")
     colnames(count.CT) <- rownames(map.cords)
 
-    if (return.format == "Seurat") {
+    if (output.format == "Seurat") {
         coord.df <- data.frame(imagerow = map.cords$x, imagecol = map.cords$y) %>% `rownames<-`(rownames(map.cords))
         if (class(sp.obj@images[[1]])[[1]] != "SlideSeq") {
             sce <- CreateSeuratObject(count = count.CT, meta.data = map.cords, project = "Cell2Spatial", assay = "Spatial")

@@ -4,19 +4,33 @@
 #' @param obj.seu Seurat object.
 #' @param sc.markers A list of markers for cell types.
 #' @param assay The assay used to calculate signature scores of cell types. Default: SCT.
+#' @param method Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.
 #' @return A data.frame of signature scores.
 #' @export getGsetScore
 
-getGsetScore <- function(obj.seu, sc.markers, assay = "SCT") {
-    expr <- GetAssayData(obj.seu, slot = "data", assay = assay)
-    score.df <- future.apply::future_lapply(names(sc.markers), function(ctype) {
-        gset <- sc.markers[[ctype]]
-        expr.sub <- expr[gset, ] %>% as.data.frame()
-        score <- colMeans(expr.sub, na.rm = TRUE)
-    }, future.seed = TRUE) %>%
-        do.call(rbind, .) %>%
-        t() %>%
-        `colnames<-`(names(sc.markers))
+getGsetScore <- function(obj.seu, sc.markers, assay = "SCT", method = c("AddModuleScore", "UCell", "AverageExpr")) {
+    score.df <- switch(match.arg(method),
+        AddModuleScore = {
+            obj.seu <- Seurat::AddModuleScore(obj = obj.seu, assay = assay, features = sc.markers, name = "CELL2SPATIAL")
+            score.df <- obj.seu@meta.data[, grep("CELL2SPATIAL", colnames(obj.seu@meta.data))]
+            colnames(score.df) <- names(sc.markers)[1:ncol(score.df)]
+            return(score.df)
+        },
+        UCell = {
+            score.df <- UCell::ScoreSignatures_UCell(GetAssayData(obj.seu), features = sc.markers) %>% `colnames<-`(names(sc.markers))
+        },
+        AverageExpr = {
+            expr <- GetAssayData(obj.seu, slot = "data", assay = assay)
+            score.df <- future.apply::future_lapply(names(sc.markers), function(ctype) {
+                gset <- sc.markers[[ctype]]
+                expr.sub <- expr[gset, ] %>% as.data.frame()
+                score <- colMeans(expr.sub, na.rm = TRUE)
+            }, future.seed = TRUE) %>%
+                do.call(rbind, .) %>%
+                t() %>%
+                `colnames<-`(names(sc.markers))
+        }
+    )
     return(score.df)
 }
 
@@ -81,7 +95,7 @@ dectHotSpotsByTtest <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0
 #' @return A data frame containing hotspot information. A value of TRUE indicates a detected hotspot, while any other value indicates a non-hotspot.
 
 dectHotSpotsByGetisOrdGi <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0.05) {
-    image.coord <- GetTissueCoordinates(sp.obj)[colnames(sp.obj), ]
+    image.coord <- GetTissueCoordinates(sp.obj)[colnames(sp.obj), c(1, 2)]
     nb <- spdep::knn2nb(spdep::knearneigh(image.coord, k = knn))
 
     listw <- spdep::nb2listw(nb, style = "W")

@@ -14,7 +14,7 @@ findScMarkers(
 \arguments{
 \item{sc.obj}{Seurat object of single-cell data.}
 
-\item{group.size}{Marker size of each subset derived from SC data. Default: 30.}
+\item{group.size}{Marker size of each subset derived from SC data. Default: 100.}
 
 \item{select.markers}{Strategy for inferring marker genes. Default: shannon.}
 

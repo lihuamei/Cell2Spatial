@@ -10,7 +10,7 @@ assignSCcords(
   out.sc,
   num.cells,
   n.workers = 4,
-  return.format = "Seurat"
+  output.format = "Seurat"
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ assignSCcords(
 
 \item{n.workers}{Number of cores for parallel processing. Default: 4.}
 
-\item{return.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
+\item{output.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
 }
 \value{
 Seurat or SingleCellExperiment object for mapped results.

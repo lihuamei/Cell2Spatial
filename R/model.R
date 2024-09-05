@@ -118,7 +118,6 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
         {
             out.sim.sub * adj.w.sub
         } %>% t()
-    out.sim.w <- t(out.sim.sub)
     if (!is.null(hot.spts)) {
         hot.spts.flat <- hot.spts[names(spot.name), cell.names] %>%
             `colnames<-`(names(cell.names)) %>%
@@ -275,16 +274,17 @@ mergeClusters <- function(sp.obj, num.cells, max.block.size = 20000) {
     return(idx.merg)
 }
 
-#' @title partionClusters
+#' @title partitionClusters
 #'
 #' @description Partition single cells into sub-clusters using a deep learning strategy based on integration of spatial transcriptomics (ST) and single-cell (SC) data.
 #' @param sp.obj Seurat object containing ST data.
 #' @param sc.obj Seurat object containing SC data.
 #' @param num.cells A vector of cell counts in spots.
+#' @param hclust Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.
 #' @return A list of single cells partitioned into sub-clusters.
-#' @export partionClusters
+#' @export partitionClusters
 
-partionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts) {
+partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE) {
     sc.st.int <- featureSelelction(sp.obj, sc.obj, n.features = 3000, verbose = FALSE)
     sc.int <- sc.st.int$sc
     sp.int <- sc.st.int$st
@@ -296,9 +296,15 @@ partionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts) {
 
     sp.embeddings <- sp.int@reductions$pca@cell.embeddings[, 1:30]
     sc.embeddings <- sc.int@reductions$pca@cell.embeddings[, 1:30]
-    labels <- mergeClusters(sp.obj, num.cells)
-    Idents(sp.obj) <- labels
-    levels(sp.obj) <- unique(labels) %>% stringr::str_sort(., numeric = TRUE)
+    if (hclust) {
+        labels <- mergeClusters(sp.obj, num.cells)
+        Idents(sp.obj) <- labels
+        levels(sp.obj) <- unique(labels) %>% stringr::str_sort(., numeric = TRUE)
+    } else {
+        labels <- Idents(sp.int) %>%
+            as.vector() %>%
+            as.integer()
+    }
     netx.pred <- runNetModel(sc.embeddings, sp.embeddings, as.integer(labels), epochs = 1000) %>%
         `rownames<-`(colnames(sc.int)) %>%
         `colnames<-`(levels(sp.obj))
@@ -369,16 +375,17 @@ partionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts) {
 #' @param adj.w Weight matrix for adjusting similarity scores.
 #' @param num.cells A vector indicating the cell count per spot projected to spots.
 #' @param hot.spts Data frame indicating hotspot presence in spots and cell types.
-#' @param partion Logical indicating whether to split into sub-modules mapped to spatial positions.
+#' @param partition Logical indicating whether to split into sub-modules mapped to spatial positions.
+#' @param hclust Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.
 #' @return A list of assigned cells corresponding to spots.
 #' @export linearSumAssignment
 
-linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, partion) {
-    if (partion) {
-        index.lst <- partionClusters(sp.obj, sc.obj, num.cells, hot.spts)
+linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, partition, hclust = TRUE) {
+    if (partition) {
+        index.lst <- partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, hclust = hclust)
     } else {
         if (nrow(out.sim) > 30000) {
-            index.lst <- partionClusters(sp.obj, sc.obj, num.cells, hot.spts)
+            index.lst <- partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, hclust = hclust)
         } else {
             index.lst <- list(ENTIRE = NULL)
         }
@@ -403,6 +410,7 @@ linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.s
         sim.file <- file.path(tmp.dir, sprintf("sim_%s.xls", cls))
         num.file <- file.path(tmp.dir, sprintf("num_%s.xls", cls))
         data.table::fwrite(as.data.frame(out.sim.sub) * (-1), file = sim.file)
+        # data.table::fwrite(as.data.frame(out.sim.sub), file = sim.file)
         data.table::fwrite(as.data.frame(num.cells[colnames(out.sim.sub)]), file = num.file)
 
         python.script <- system.file("R/solve.py", package = "Cell2Spatial")

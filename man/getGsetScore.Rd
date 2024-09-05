@@ -4,7 +4,12 @@
 \alias{getGsetScore}
 \title{getGsetScore}
 \usage{
-getGsetScore(obj.seu, sc.markers, assay = "SCT")
+getGsetScore(
+  obj.seu,
+  sc.markers,
+  assay = "SCT",
+  method = c("AddModuleScore", "UCell", "AverageExpr")
+)
 }
 \arguments{
 \item{obj.seu}{Seurat object.}
@@ -12,6 +17,8 @@ getGsetScore(obj.seu, sc.markers, assay = "SCT")
 \item{sc.markers}{A list of markers for cell types.}
 
 \item{assay}{The assay used to calculate signature scores of cell types. Default: SCT.}
+
+\item{method}{Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.}
 }
 \value{
 A data.frame of signature scores.

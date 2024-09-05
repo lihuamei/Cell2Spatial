@@ -22,8 +22,18 @@ println <- function(X, verbose = TRUE, status = c("INFO", "ERROR", "WARN"), ...)
 #' @return NULL
 
 multipleProcess <- function(n.workers = 4) {
-    options(future.globals.maxSize = 5000000 * 1024^2, future.seed = TRUE)
+    options(future.globals.maxSize = 200000 * 1024^2, future.seed = TRUE)
     future::plan("multicore", workers = n.workers)
+}
+
+#' @title garbageCollection
+#'
+#' @return NULL
+
+garbageCollection <- function(...) {
+    objects_to_remove <- as.character(match.call(expand.dots = FALSE)$...)
+    rm(list = objects_to_remove, envir = parent.frame())
+    gc()
 }
 
 #' @title downSamplSeurat
@@ -52,7 +62,7 @@ downSamplSeurat <- function(obj.seu, cnt = 500, percent = NULL, seed = 123456) {
 #'
 #' @description Find markers among cell types based on SC data.
 #' @param sc.obj Seurat object of single-cell data.
-#' @param group.size Marker size of each subset derived from SC data. Default: 30.
+#' @param group.size Marker size of each subset derived from SC data. Default: 100.
 #' @param select.markers Strategy for inferring marker genes. Default: shannon.
 #' @param verbose Show running messages or not. Default: TRUE.
 #' @return A tibble of identified markers.

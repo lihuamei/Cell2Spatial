@@ -11,7 +11,8 @@ linearSumAssignment(
   adj.w,
   num.cells,
   hot.spts,
-  partion
+  partition,
+  hclust = TRUE
 )
 }
 \arguments{
@@ -27,7 +28,9 @@ linearSumAssignment(
 
 \item{hot.spts}{Data frame indicating hotspot presence in spots and cell types.}
 
-\item{partion}{Logical indicating whether to split into sub-modules mapped to spatial positions.}
+\item{partition}{Logical indicating whether to split into sub-modules mapped to spatial positions.}
+
+\item{hclust}{Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.}
 }
 \value{
 A list of assigned cells corresponding to spots.

@@ -67,7 +67,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, verb
         anchor.features = features,
         verbose = verbose
     )
-    obj <- IntegrateData(anchorset = anchors, normalization.method = "LogNormalize", verbose = verbose)
+    obj <- IntegrateData(anchorset = anchors, normalization.method = "LogNormalize", k.weight = 30, verbose = verbose)
     obj <- ScaleData(obj, verbose = verbose)
     obj <- RunPCA(obj, verbose = verbose)
     obj <- RunUMAP(obj, reduction = "pca", dims = 1:npcs, verbose = verbose)
@@ -84,6 +84,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, verb
 
 findClustersForSpData <- function(obj.seu, npcs = 30, res = 0.8, verbose = TRUE) {
     obj.seu <- obj.seu %>%
+        RunPCA(., verbose = verbose) %>%
         FindNeighbors(., reduction = "pca", verbose = verbose) %>%
         FindClusters(., verbose = verbose) %>%
         RunUMAP(., reduction = "pca", dims = 1:npcs, verbose = verbose)
@@ -186,7 +187,6 @@ weightDist <- function(sc.obj, sp.obj, lamba, mc.cores = 4, use.entire = TRUE) {
                 .[, -1]
             } %>%
             `colnames<-`(levels(sc.obj))
-        message("")
     }
     return(adj.df)
 }

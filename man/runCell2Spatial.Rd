@@ -7,22 +7,24 @@
 runCell2Spatial(
   sp.obj,
   sc.obj,
-  ctype = "idents",
+  cell.type.column = "idents",
+  sample.size = NULL,
   sc.markers = NULL,
-  group.size = 30,
-  res = 0.8,
-  partion = TRUE,
+  marker.selection.method = c("shannon", "wilcox"),
+  group.size = 100,
+  resolution = 0.8,
+  knn = 5,
+  partition = TRUE,
   max.cells.in.spot = 10,
   fix.cells.in.spot = NULL,
-  knn = 5,
-  sample.size = NULL,
-  detect.hotspot.method = c("getis.ord", "t.test"),
-  p.value.threshold = 0.1,
-  quantile.threshold = 0.99,
-  select.markers = c("shannon", "wilcox"),
+  signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
+  hotspot.detection.method = c("getis.ord", "t.test"),
+  hotspot.detection.threshold = 1,
+  integ.entire.dataset = FALSE,
+  feature.based = c("gene.based", "celltype.based"),
   dist.method = c("mle", "cor"),
-  return.type = c("Seurat", "SingleCellExperiment"),
-  integ.entire = TRUE,
+  hclust = TRUE,
+  output.type = c("Seurat", "SingleCellExperiment"),
   n.workers = 4,
   verbose = TRUE
 )
@@ -32,37 +34,41 @@ runCell2Spatial(
 
 \item{sc.obj}{Seurat object of single-cell (SC) data.}
 
-\item{ctype}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
+\item{cell.type.column}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
+
+\item{sample.size}{Down-sample a small subset of SC data for mapping to ST coordinates. Default: NULL.}
 
 \item{sc.markers}{When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.}
 
+\item{marker.selection.method}{Method for selecting cell-type specific markers when \code{sc.markers = NULL}: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.}
+
 \item{group.size}{Specify the marker size for each subset derived from single-cell data. Default: 30.}
 
-\item{res}{Resolution for clustering ST spots. Default: 0.8.}
+\item{resolution}{Resolution for clustering ST spots. Default: 0.8.}
 
-\item{partion}{Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: TRUE.}
+\item{knn}{Utilize the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.}
+
+\item{partition}{Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: TRUE.}
 
 \item{max.cells.in.spot}{Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set \code{max.cells.in.spot} to 1.}
 
 \item{fix.cells.in.spot}{Fixed number of cells assigned to a spot. Default: NULL.}
 
-\item{knn}{Utilize the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.}
+\item{signature.scoring.method}{Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.}
 
-\item{sample.size}{Down-sample a small subset of SC data for mapping to ST coordinates. Default: NULL.}
+\item{hotspot.detection.method}{Detect hot spots based on the signature scores of a specific cell type in ST spots using the Getis-Ord \link{getis.ord} method or t-test \link{t.test} framework. Default: getis.ord.}
 
-\item{detect.hotspot.method}{Detect hot spots based on the signature scores of a specific cell type in ST spots using the Getis-Ord \link{getis.ord} method or t-test \link{t.test} framework. Default: getis.ord.}
+\item{hotspot.detection.threshold}{P-value threshold for determining hot spots of cell types, range from 0 to 1. Default: 1.}
 
-\item{p.value.threshold}{P-value threshold for determining hot spots of cell types. Default: 0.3.}
+\item{integ.entire.dataset}{Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: FALSE.}
 
-\item{quantile.threshold}{Quantile threshold for selecting single cells as a reference to estimate cell counts in spots. Default: 0.99.}
-
-\item{select.markers}{Method for selecting cell-type specific markers when \code{sc.markers = NULL}: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.}
+\item{feature.based}{Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: 'gene.based'.}
 
 \item{dist.method}{Measure the distance between single cells and spots, using maximum likelihood model (mle) or correlation (cor). Default: mle.}
 
-\item{return.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
+\item{hclust}{Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.}
 
-\item{integ.entire}{Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: TRUE.}
+\item{output.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
 
 \item{n.workers}{Number of cores for parallel processing. Default: 4.}
 
@@ -77,5 +83,5 @@ Accurate mapping of single cells to spatial coordinates.
 \examples{
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
-sce <- runCell2Spatial(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30)
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 30)
 }

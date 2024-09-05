@@ -25,6 +25,7 @@ Imports:
     ggcorrplot,
     glmGamPoi,
     MASS,
-    stringr
+    stringr,
+    UCell
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
