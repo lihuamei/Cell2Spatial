@@ -117,7 +117,7 @@ adjcentScOfSP <- function(obj) {
                 select(celltype, distance)
             spot_name <- spot$spot_name
             distances %>% mutate(spot_name = spot_name)
-        }) %>%
+        }, .progress = FALSE) %>%
         ungroup()
 
     spot.distances <- spot.distances %>% distinct(spot_name, celltype, .keep_all = TRUE)

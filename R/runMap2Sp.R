@@ -70,7 +70,7 @@ runCell2Spatial <- function(sp.obj,
     sc.markers <- selectMakers(sc.obj, sc.markers, match.arg(marker.selection.method), group.size, verbose = verbose)
 
     println("Detecting hotspot regions for ST data", verbose = verbose)
-    sp.score <- getGsetScore(sp.obj, sc.markers, assay = "SCT")
+    sp.score <- getGsetScore(sp.obj, sc.markers, assay = "SCT", match.arg(signature.scoring.method))
     hot.spts <- switch(match.arg(hotspot.detection.method),
         getis.ord = {
             hot.spts <- dectHotSpotsByGetisOrdGi(sp.obj, sp.score, knn, hotspot.detection.threshold)
@@ -116,7 +116,7 @@ runCell2Spatial <- function(sp.obj,
             as.matrix() %>%
             t()
     } else {
-        sc.score <- getGsetScore(sc.obj, sc.markers, assay = "RNA")
+        sc.score <- getGsetScore(sc.obj, sc.markers, assay = "RNA", match.arg(signature.scoring.method))
     }
     sp.score <- sp.score[keep.spots, ]
     out.sim <- switch(match.arg(dist.method),
