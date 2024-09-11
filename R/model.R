@@ -146,7 +146,7 @@ weigthNetProb <- function(netx.pred, sc.obj, sp.obj, hot.spts) {
         pivot_wider(names_from = Cell_Type, values_from = Total_Count, values_fill = 0) %>%
         as.data.frame() %>%
         `rownames<-`(.[, 1]) %>%
-        .[, -1] %>%
+        .[, -1, drop = FALSE] %>%
         sweep(., 2, colSums(.), "/") %>%
         t()
 

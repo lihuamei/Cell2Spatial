@@ -92,7 +92,7 @@ runCell2Spatial <- function(sp.obj,
         adj.w <- weightDist(sc.obj, sp.obj, lamba, mc.cores = n.workers, use.entire = integ.entire.dataset)
     })
     sp.obj <- subset(sp.obj, cells = keep.spots)
-    hot.spts <- hot.spts[keep.spots, ]
+    hot.spts <- hot.spts[keep.spots, ,drop = FALSE]
     num.cells <- num.cells[keep.spots]
     println("Estimating cellular proportions in each spot and adjusting SC data for mapping", verbose = verbose)
     if (length(sc.markers) > 1) {
@@ -106,7 +106,8 @@ runCell2Spatial <- function(sp.obj,
     garbageCollection(st.prop)
 
     println("Similarity estimation for single-cells and spots", verbose = verbose)
-    if (match.arg(feature.based) == "gene.based") {
+    feature.based <- ifelse(length(sc.obj) == 1, 'gene.based', match.arg(feature.based))
+    if (feature.based == "gene.based") {
         sp.score <- GetAssayData(sp.obj) %>%
             .[unique(unlist(sc.markers)), ] %>%
             as.matrix() %>%

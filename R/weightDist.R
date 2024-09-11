@@ -169,7 +169,7 @@ adjcentScOfSPGlobal <- function(obj) {
 #' @return A matrix of weighted distance matrix. Rows represent spot clusters and columns are cell types.
 
 weightDist <- function(sc.obj, sp.obj, lamba, mc.cores = 4, use.entire = TRUE) {
-    if (use.entire) {
+    if (use.entire || length(levels(sc.obj)) == 1) {
         adj.df <- integDataBySeurat(sp.obj, sc.obj, verbose = FALSE) %>%
             adjcentScOfSPGlobal(.)
     } else {
