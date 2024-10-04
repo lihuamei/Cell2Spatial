@@ -41,7 +41,7 @@ getGsetScore <- function(obj.seu, sc.markers, assay = "SCT", method = c("AddModu
 #' @param sp.score Signature score of cell types.
 #' @param knn K nearest cells used. Default: 5.
 #' @param p.value.threshold P-value threadhold for filtering out hot-spots. Default: 0.05.
-#' @return A data frame containing hotspot information. A value of TRUE indicates a detected hotspot, while FALSE indicates a non-hotspot.
+#' @return A list of data frames containing hotspot information and p-values. A value of TRUE indicates a detected hotspot, while FALSE indicates a non-hotspot.
 
 dectHotSpotsByTtest <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0.05) {
     dist.lst <- calcSpotsDist(sp.obj)
@@ -82,7 +82,7 @@ dectHotSpotsByTtest <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0
         do.call(rbind, .) %>%
         `rownames<-`(rownames(sp.score))
     hotspot.spots <- spot.pvals <= p.value.threshold
-    return(spot.pvals)
+    return(list(x = hotspot.spots, y = p.values))
 }
 
 #' @title dectHotSpotsByGetisOrdGi
@@ -92,7 +92,7 @@ dectHotSpotsByTtest <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0
 #' @param sp.score Signature score of cell types.
 #' @param knn K nearest cells used. Default: 5.
 #' @param p.value.threshold P-value threadhold for filtering out hot-spots. Default: 0.05.
-#' @return A data frame containing hotspot information. A value of TRUE indicates a detected hotspot, while any other value indicates a non-hotspot.
+#' @return A list of data frames containing hotspot information and P-values. A value of TRUE indicates a detected hotspot, while any other value indicates a non-hotspot.
 
 dectHotSpotsByGetisOrdGi <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0.05) {
     image.coord <- GetTissueCoordinates(sp.obj)[colnames(sp.obj), c(1, 2)]
@@ -107,5 +107,5 @@ dectHotSpotsByGetisOrdGi <- function(sp.obj, sp.score, knn = 5, p.value.threshol
         pnorm(gi, lower.tail = FALSE)
     })
     hotspot.spots <- p.values <= p.value.threshold
-    return(hotspot.spots)
+    return(list(x = hotspot.spots, y = p.values))
 }

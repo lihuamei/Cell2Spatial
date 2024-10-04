@@ -73,12 +73,13 @@ runCell2Spatial <- function(sp.obj,
     sp.score <- getGsetScore(sp.obj, sc.markers, assay = "SCT", match.arg(signature.scoring.method))
     hot.spts <- switch(match.arg(hotspot.detection.method),
         getis.ord = {
-            hot.spts <- dectHotSpotsByGetisOrdGi(sp.obj, sp.score, knn, hotspot.detection.threshold)
+            hot.spts.lst <- dectHotSpotsByGetisOrdGi(sp.obj, sp.score, knn, hotspot.detection.threshold)
         },
         t.test = {
-            hot.spts <- dectHotSpotsByTtest(sp.obj, sp.score, knn, hotspot.detection.threshold)
+            hot.spts.lst <- dectHotSpotsByTtest(sp.obj, sp.score, knn, hotspot.detection.threshold)
         }
     )
+    hot.spts <- hot.spts.lst$x
     keep.spots <- rownames(hot.spts)[rowSums(hot.spts) > 0]
     println("Clustering spots for ST data and estimating the cell counts per spot", verbose = verbose)
     suppressWarnings({
@@ -96,7 +97,8 @@ runCell2Spatial <- function(sp.obj,
     num.cells <- num.cells[keep.spots]
     println("Estimating cellular proportions in each spot and adjusting SC data for mapping", verbose = verbose)
     if (length(sc.markers) > 1) {
-        st.prop <- estPropInSpots(sp.obj, sc.obj, hot.spts, sc.markers, intercept = TRUE)
+	hot.pvals <- hot.spts.lst$y[keep.spots, , drop = FALSE]
+        st.prop <- estPropInSpots(sp.obj, sc.obj, hot.pvals, sc.markers, intercept = TRUE)
     } else {
         st.prop <- data.frame(rep(1, ncol(sp.obj))) %>%
             `colnames<-`(names(sc.markers)) %>%

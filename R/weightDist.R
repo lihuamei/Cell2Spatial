@@ -105,7 +105,8 @@ adjcentScOfSP <- function(obj) {
         mutate(celltype = subset(obj, Batches == "SC")$CellType) %>%
         group_by(celltype) %>%
         summarize(UMAP_1 = mean(UMAP_1), UMAP_2 = mean(UMAP_2))
-
+    
+    options(dplyr.show_progress = FALSE)
     umap.sp <- subset(umap.coord, Batches == "ST")[, 1:2]
     umap.sp <- umap.sp %>% mutate(spot_name = rownames(umap.sp))
     spot.distances <- umap.sp %>%
@@ -117,7 +118,7 @@ adjcentScOfSP <- function(obj) {
                 select(celltype, distance)
             spot_name <- spot$spot_name
             distances %>% mutate(spot_name = spot_name)
-        }, .progress = FALSE) %>%
+        }) %>%
         ungroup()
 
     spot.distances <- spot.distances %>% distinct(spot_name, celltype, .keep_all = TRUE)
