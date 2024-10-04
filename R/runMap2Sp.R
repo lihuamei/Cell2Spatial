@@ -96,8 +96,8 @@ runCell2Spatial <- function(sp.obj,
     hot.spts <- hot.spts[keep.spots, ,drop = FALSE]
     num.cells <- num.cells[keep.spots]
     println("Estimating cellular proportions in each spot and adjusting SC data for mapping", verbose = verbose)
+    hot.pvals <- hot.spts.lst$y[keep.spots, , drop = FALSE]
     if (length(sc.markers) > 1) {
-	hot.pvals <- hot.spts.lst$y[keep.spots, , drop = FALSE]
         st.prop <- estPropInSpots(sp.obj, sc.obj, hot.pvals, sc.markers, intercept = TRUE)
     } else {
         st.prop <- data.frame(rep(1, ncol(sp.obj))) %>%
@@ -134,7 +134,7 @@ runCell2Spatial <- function(sp.obj,
 
     println(sprintf("Assigning %g single-cells to spots and generating spatial coordinates", sum(num.cells)))
     suppressWarnings({
-        out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, partition, hclust)
+        out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.pvals, partition, hclust)
     })
     sce <- assignSCcords(sp.obj, sc.obj, out.sc, lapply(out.sc, length), match.arg(output.type), n.workers = n.workers)
     garbageCollection(sp.obj, sc.obj, out.sim, adj.w, hot.spts, num.cells, out.sc)

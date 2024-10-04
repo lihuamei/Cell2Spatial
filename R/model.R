@@ -125,6 +125,7 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
             out.sim.sub * adj.w.sub
         } %>% t()
     if (!is.null(hot.spts)) {
+	hot.spts <- hot.spts <= 0.01
         hot.spts.flat <- hot.spts[names(spot.name), cell.names] %>%
             `colnames<-`(names(cell.names)) %>%
             t()
@@ -144,6 +145,7 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
 #' @return Adjusted network predictions matrix where weights are applied based on cell type proportions and hotspot information.
 
 weigthNetProb <- function(netx.pred, sc.obj, sp.obj, hot.spts) {
+    hot.spts <- hot.spts <= 0.01
     hot.spts.new <- cbind.data.frame(hot.spts, CLUSTER = Idents(sp.obj)[rownames(hot.spts)])
     cluster.summary <- hot.spts.new %>%
         pivot_longer(cols = -CLUSTER, names_to = "Cell_Type", values_to = "Count") %>%
@@ -322,7 +324,7 @@ partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE
         unlist() %>%
         `names<-`(levels(sp.obj))
 
-    netx.pred <- weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
+    #netx.pred <- weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
     netx.pred.scale <- sweep(netx.pred, MARGIN = 1, apply(netx.pred, 1, max), "/")
     max.idxes <- apply(netx.pred, 1, which.max) %>%
         colnames(netx.pred)[.] %>%

@@ -83,7 +83,7 @@ adjustScObj <- function(sc.obj, st.prop, num.cells) {
         as.vector()
     meta.data <-
         {
-            sc.obj@meta.data[colnames(expr.mat), ]
+            sc.obj@meta.data[gsub('Pseudo_|_XYZ.*', '', colnames(expr.mat)), ]
         } %>% `rownames<-`(colnames(expr.mat))
     sc.obj.new <- CreateSeuratObject(count = expr.mat, meta.data = meta.data, assay = "RNA") %>% SCTransform(verbose = FALSE, method = "glmGamPoi")
     Idents(sc.obj.new) <- cell.types
