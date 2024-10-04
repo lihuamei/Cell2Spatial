@@ -296,7 +296,7 @@ partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE
     sc.st.int <- featureSelelction(sp.obj, sc.obj, n.features = 3000, verbose = FALSE)
     sc.int <- sc.st.int$sc
     sp.int <- sc.st.int$st
-    python.script <- system.file("R/netx.py", package = "Cell2Spatial")
+    python.script <- system.file("python/netx.py", package = "Cell2Spatial")
     command <- ifelse(.Platform$OS.type == "windows", "where", "which")
     py.path <- system(sprintf("%s python", command), intern = TRUE)
     reticulate::use_python(py.path)
@@ -414,14 +414,14 @@ linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.s
         cell.names <- Idents(sc.obj)[colnames(out.sim.sub)]
         out.sim.sub <- weightSimScore(out.sim.sub, adj.w, spot.name, cell.names, hot.spts)
 
-        tmp.dir <- tempdir()
+	tmp.dir <- tempdir()
         sim.file <- file.path(tmp.dir, sprintf("sim_%s.xls", cls))
         num.file <- file.path(tmp.dir, sprintf("num_%s.xls", cls))
         data.table::fwrite(as.data.frame(out.sim.sub) * (-1), file = sim.file)
         data.table::fwrite(as.data.frame(num.cells[colnames(out.sim.sub)]), file = num.file)
 
-        python.script <- system.file("R/solve.py", package = "Cell2Spatial")
-        system(sprintf("python %s %s %s %s %s", python.script, tmp.dir, sim.file, num.file, cls))
+        python.script <- system.file("python/solve.py", package = "Cell2Spatial")
+	system(sprintf("python %s %s %s %s %s", python.script, tmp.dir, sim.file, num.file, cls))
 
         index <- read.table(file.path(tmp.dir, paste0(cls, "_output.txt"))) + 1
         spot.ids <- colnames(out.sim.sub)[index[, 1]]
