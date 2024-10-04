@@ -52,7 +52,7 @@ sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% re
 
 ## 4. Assigning single-cells to spatial spots.
 ```r
-sce <- runMap2SP(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30, fix.cells.in.spot = 10)
+sce <- runCell2Spatial(sp.obj, sc.obj, ctype = "mainCtype", res = 0.8, group.size = 30, fix.cells.in.spot = 10)
 
 ```
 
