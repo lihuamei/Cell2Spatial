@@ -301,17 +301,18 @@ hclustPartition <- function(netx.pred, sp.obj, sc.obj, st.prop, num.cells) {
     max.cells <- table(Idents(sc.obj))[names(re.assig)]
     diff.cnts <- re.assig - max.cells
     adj.cnts <- diff.cnts[which(diff.cnts > 0)]
-    ii <-
-        {
-            -diff.cnts - adj.cnts
-        } %>%
-        .[order(.)] %>%
-        {
-            names(.)[which(. >= 0)[1]]
-        }
-    re.assig[ii] <- re.assig[ii] + sum(adj.cnts)
-    re.assig[names(adj.cnts)] <- re.assig[names(adj.cnts)] - adj.cnts
-
+    if (length(adj.cnts) > 0) {
+        ii <-
+            {
+                -diff.cnts - sum(adj.cnts)
+            } %>%
+            .[order(.)] %>%
+            {
+                names(.)[which(. >= 0)[1]]
+            }
+        re.assig[ii] <- re.assig[ii] + sum(adj.cnts)
+        re.assig[names(adj.cnts)] <- re.assig[names(adj.cnts)] - adj.cnts
+    }
     keep.cells <- lapply(levels(sc.obj), function(xx) {
         sc.cells <- Idents(sc.obj)[Idents(sc.obj) == xx] %>% names()
         cnt <- re.assig[xx]
