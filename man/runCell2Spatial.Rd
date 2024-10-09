@@ -14,7 +14,7 @@ runCell2Spatial(
   group.size = 100,
   resolution = 0.8,
   knn = 5,
-  partition = TRUE,
+  partition = FALSE,
   max.cells.in.spot = 10,
   fix.cells.in.spot = NULL,
   signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
@@ -48,7 +48,7 @@ runCell2Spatial(
 
 \item{knn}{Utilize the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.}
 
-\item{partition}{Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: TRUE.}
+\item{partition}{Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: FALSE.}
 
 \item{max.cells.in.spot}{Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set \code{max.cells.in.spot} to 1.}
 
@@ -83,5 +83,5 @@ Accurate mapping of single cells to spatial coordinates.
 \examples{
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
-sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 30)
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 100)
 }

@@ -11,6 +11,7 @@ linearSumAssignment(
   adj.w,
   num.cells,
   hot.spts,
+  st.prop,
   partition,
   hclust = TRUE
 )
@@ -27,6 +28,8 @@ linearSumAssignment(
 \item{num.cells}{A vector indicating the cell count per spot projected to spots.}
 
 \item{hot.spts}{Data frame indicating hotspot presence in spots and cell types.}
+
+\item{st.prop}{Estimated proportions for ST spots.}
 
 \item{partition}{Logical indicating whether to split into sub-modules mapped to spatial positions.}
 

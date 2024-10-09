@@ -105,7 +105,7 @@ adjcentScOfSP <- function(obj) {
         mutate(celltype = subset(obj, Batches == "SC")$CellType) %>%
         group_by(celltype) %>%
         summarize(UMAP_1 = mean(UMAP_1), UMAP_2 = mean(UMAP_2))
-    
+
     options(dplyr.show_progress = FALSE)
     umap.sp <- subset(umap.coord, Batches == "ST")[, 1:2]
     umap.sp <- umap.sp %>% mutate(spot_name = rownames(umap.sp))

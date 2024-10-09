@@ -8,8 +8,8 @@ estCellPerSpots(
   sp.obj,
   max.cells = 10,
   fix.cells.in.spot = NULL,
-  quantile.cut = 0.999,
-  num.genes = 2000
+  quantile.cut = 0.95,
+  num.genes = 1000
 )
 }
 \arguments{
@@ -19,7 +19,7 @@ estCellPerSpots(
 
 \item{fix.cells.in.spot}{Fixed number of cells assigned to each spot. Default: NULL.}
 
-\item{quantile.cut}{Spots with a number of UMIs greater than the quantile cutoff are set as a reference. Default: 0.99.}
+\item{quantile.cut}{Spots with a number of UMIs greater than the quantile cutoff are set as a reference. Default: 0.95.}
 
 \item{num.genes}{Number of stable genes used in the estimation. Default: 2000.}
 }

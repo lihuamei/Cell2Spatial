@@ -1,7 +1,7 @@
 Package: Cell2Spatial
 Title: Cell2Spatial: precisely deciphering spatial transcriptomic spots at single-cell granularity.
-Version: 1.0.1
-Date: 2024-07-06
+Version: 1.0.2
+Date: 2024-10-09
 Authors: c(person("Li", "Huamei", "li_hua_mei@163.com", role = c("aut"), comment = c(ORCID = "0009-0009-0112-0972")))
 Maintainer: Huamei Li <li_hua_mei@163.com>
 Description: A tool for accurately mapping individual cells to spatial coordinates.

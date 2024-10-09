@@ -4,7 +4,7 @@
 \alias{partitionClusters}
 \title{partitionClusters}
 \usage{
-partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE)
+partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclust = TRUE)
 }
 \arguments{
 \item{sp.obj}{Seurat object containing ST data.}
@@ -12,6 +12,10 @@ partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE)
 \item{sc.obj}{Seurat object containing SC data.}
 
 \item{num.cells}{A vector of cell counts in spots.}
+
+\item{hot.spts}{Data frame indicating hotspot presence in spots and cell types.}
+
+\item{st.prop}{Estimated proportions for ST spots.}
 
 \item{hclust}{Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.}
 }

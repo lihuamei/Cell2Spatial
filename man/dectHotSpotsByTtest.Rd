@@ -16,7 +16,7 @@ dectHotSpotsByTtest(sp.obj, sp.score, knn = 5, p.value.threshold = 0.05)
 \item{p.value.threshold}{P-value threadhold for filtering out hot-spots. Default: 0.05.}
 }
 \value{
-A data frame containing hotspot information. A value of TRUE indicates a detected hotspot, while FALSE indicates a non-hotspot.
+A list of data frames containing hotspot information and p-values. A value of TRUE indicates a detected hotspot, while FALSE indicates a non-hotspot.
 }
 \description{
 Infer whether the signature scores in spots significant higher than background.

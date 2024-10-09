@@ -4,7 +4,14 @@
 \alias{weightSimScore}
 \title{weightSimScore}
 \usage{
-weightSimScore(out.sim, adj.w, spot.name, cell.names, hot.spts = NULL)
+weightSimScore(
+  out.sim,
+  adj.w,
+  spot.name,
+  cell.names,
+  hot.spts = NULL,
+  p.cut = 0.01
+)
 }
 \arguments{
 \item{out.sim}{Matrix or data frame of similarity scores between spots and cell types.}

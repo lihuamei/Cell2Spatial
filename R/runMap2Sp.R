@@ -67,10 +67,15 @@ runCell2Spatial <- function(sp.obj,
     if (length(levels(sc.obj)) > 1) {
         println("Finding specific markers across cell types based on SC data", verbose = verbose)
     }
+    feature.based <- ifelse(length(levels(sc.obj)) == 1, "gene.based", match.arg(feature.based))
+    if (feature.based == "celltype.based" && match.arg(signature.scoring.method) == "AddModuleScore" && match.arg(dist.method) == "mle") {
+        println("Signature scoring strategy has been reset from AddModuleScore to the UCell method", verbose = TRUE, status = "WARN")
+        signature.scoring.method <- "UCell"
+    }
     sc.markers <- selectMakers(sc.obj, sc.markers, match.arg(marker.selection.method), group.size, verbose = verbose)
 
     println("Detecting hotspot regions for ST data", verbose = verbose)
-    sp.score <- getGsetScore(sp.obj, sc.markers, assay = "SCT", match.arg(signature.scoring.method))
+    sp.score <- getGsetScore(sp.obj, sc.markers, assay = "SCT", signature.scoring.method)
     hot.spts <- switch(match.arg(hotspot.detection.method),
         getis.ord = {
             hot.spts.lst <- dectHotSpotsByGetisOrdGi(sp.obj, sp.score, knn, hotspot.detection.threshold)
@@ -93,7 +98,7 @@ runCell2Spatial <- function(sp.obj,
         adj.w <- weightDist(sc.obj, sp.obj, lamba, mc.cores = n.workers, use.entire = integ.entire.dataset)
     })
     sp.obj <- subset(sp.obj, cells = keep.spots)
-    hot.spts <- hot.spts[keep.spots, ,drop = FALSE]
+    hot.spts <- hot.spts[keep.spots, , drop = FALSE]
     num.cells <- num.cells[keep.spots]
     println("Estimating cellular proportions in each spot and adjusting SC data for mapping", verbose = verbose)
     hot.pvals <- hot.spts.lst$y[keep.spots, , drop = FALSE]
@@ -105,10 +110,8 @@ runCell2Spatial <- function(sp.obj,
             `rownames<-`(colnames(sp.obj))
     }
     sc.obj <- adjustScObj(sc.obj, st.prop, num.cells)
-    garbageCollection(st.prop)
-
     println("Similarity estimation for single-cells and spots", verbose = verbose)
-    feature.based <- ifelse(length(sc.obj) == 1, 'gene.based', match.arg(feature.based))
+    feature.based <- ifelse(length(levels(sc.obj)) == 1, "gene.based", match.arg(feature.based))
     if (feature.based == "gene.based") {
         sp.score <- GetAssayData(sp.obj) %>%
             .[unique(unlist(sc.markers)), ] %>%
@@ -119,7 +122,7 @@ runCell2Spatial <- function(sp.obj,
             as.matrix() %>%
             t()
     } else {
-        sc.score <- getGsetScore(sc.obj, sc.markers, assay = "RNA", match.arg(signature.scoring.method))
+        sc.score <- getGsetScore(sc.obj, sc.markers, assay = "SCT", signature.scoring.method)
     }
     sp.score <- sp.score[keep.spots, ]
     out.sim <- switch(match.arg(dist.method),
@@ -134,10 +137,10 @@ runCell2Spatial <- function(sp.obj,
 
     println(sprintf("Assigning %g single-cells to spots and generating spatial coordinates", sum(num.cells)))
     suppressWarnings({
-        out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.pvals, partition, hclust)
+        out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.pvals, st.prop, partition, hclust)
     })
     sce <- assignSCcords(sp.obj, sc.obj, out.sc, lapply(out.sc, length), match.arg(output.type), n.workers = n.workers)
-    garbageCollection(sp.obj, sc.obj, out.sim, adj.w, hot.spts, num.cells, out.sc)
+    garbageCollection(sp.obj, sc.obj, out.sim, adj.w, hot.spts, num.cells, out.sc, st.prop, hot.pvals)
     println("Finished!", verbose = verbose)
     return(sce)
 }

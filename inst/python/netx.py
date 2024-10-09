@@ -1,6 +1,8 @@
 import os
+import random
 import pandas as pd
 import numpy as np
+import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from tensorflow.keras.models import Sequential
@@ -8,6 +10,12 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras import regularizers
 from keras.layers import BatchNormalization
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, EarlyStopping
+
+def setAllSeeds(seed=42):
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
 
 def removeCacheModel(directory, prefix):
     files = os.listdir(directory)
@@ -31,6 +39,7 @@ def createNetMmodel(out_layers, input_shape):
     return model
 
 def trainModel(X, y_encoded, epochs = 100):
+    setAllSeeds(2024)
     best_model, best_accuracy = None, 0
     scaler = StandardScaler()
     kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -60,5 +69,6 @@ def runNetModel(sc_data, st_data, st_label, epochs = 100):
     sc_data, st_data, st_label, epochs = np.array(sc_data), np.array(st_data), np.array(st_label), int(epochs)
     model = trainModel(st_data, st_label, epochs)
     removeCacheModel('./', 'best_model_fold_')
-    predictions = model.predict(sc_data)
+    scaler = StandardScaler()
+    predictions = model.predict(scaler.fit_transform(sc_data))
     return pd.DataFrame(predictions)

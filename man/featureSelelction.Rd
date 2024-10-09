@@ -4,14 +4,20 @@
 \alias{featureSelelction}
 \title{featureSelelction}
 \usage{
-featureSelelction(sp.obj, sc.obj, n.features, verbose = TRUE)
+featureSelelction(
+  sp.obj,
+  sc.obj,
+  n.features = 3000,
+  assay = "RNA",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{sp.obj}{Seurat object containing ST data.}
 
 \item{sc.obj}{Seurat object containing SC data.}
 
-\item{n.features}{Number of features to select for integration.}
+\item{n.features}{Number of features to select for integration. Default: 3000.}
 
 \item{verbose}{Boolean indicating whether to display verbose messages during processing. Default: TRUE.}
 }

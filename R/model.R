@@ -23,10 +23,10 @@ estPropInSpots <- function(sp.obj, sc.obj, hot.pvals, sc.markers, knn = 5, inter
         }
     image.coord <- GetTissueCoordinates(sp.obj)[colnames(sp.obj), ]
     dist.lst <- lapply(levels(sp.obj), function(ident) {
-        image.coord.tmp <- image.coord[Idents(sp.obj)[Idents(sp.obj) == ident] %>% names, , drop = FALSE ]
-    	dist.mat <- dbscan::kNN(na.omit(image.coord.tmp[, c(1, 2)]), k = knn)$id
+        image.coord.tmp <- image.coord[Idents(sp.obj)[Idents(sp.obj) == ident] %>% names(), , drop = FALSE]
+        dist.mat <- dbscan::kNN(na.omit(image.coord.tmp[, c(1, 2)]), k = min(knn, nrow(image.coord.tmp)))$id
     }) %>% `names<-`(levels(sp.obj))
-    
+
     sp.expr <- GetAssayData(sp.obj, slot = "data", assay = "SCT")[rownames(base.ref), ]
     cell.types <- colnames(base.ref)
     colnames(base.ref) <- gsub(" |/|\\+|-|\\(|\\)", "_", colnames(base.ref))
@@ -39,7 +39,7 @@ estPropInSpots <- function(sp.obj, sc.obj, hot.pvals, sc.markers, knn = 5, inter
     w.mat <- ctypesOfClusters(sp.obj, hot.pvals)
 
     spot.prop <- future.apply::future_lapply(tar.spots, function(spot) {
-	dist.mat <- dist.lst[[Idents(sp.obj)[spot]]]    
+        dist.mat <- dist.lst[[Idents(sp.obj)[spot]]]
         knn.spots <- dist.mat[spot, ] %>% rownames(dist.mat)[.]
         sp.expr.sub <- sp.expr[, knn.spots] %>%
             {
@@ -84,7 +84,7 @@ ctypesOfClusters <- function(sp.obj, hot.pvals, p.cut = 0.05) {
     hot.spts.tp <- hot.pvals < p.cut
     w.mat <- lapply(levels(sp.obj), function(cls) {
         spots <- colnames(sp.obj)[Idents(sp.obj) == cls]
-        sub.pvals <- hot.spts.tp[spots, ] 
+        sub.pvals <- hot.spts.tp[spots, ]
         if (length(spots) > 1) {
             tmp.cnt <- colSums(sub.pvals)
         } else {
@@ -109,7 +109,7 @@ ctypesOfClusters <- function(sp.obj, hot.pvals, p.cut = 0.05) {
 #' @param hot.spts A data frame indicating hotspot presence in spots and cell types.
 #' @return Weighted similarity scores matrix where adjustments are applied based on provided weights and hotspot information.
 
-weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NULL) {
+weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NULL, p.cut = 0.01) {
     spot.name <- as.vector(spot.name) %>% `names<-`(names(spot.name))
     cell.names <- as.vector(cell.names) %>% `names<-`(names(cell.names))
     out.sim.sub <- out.sim[names(spot.name), names(cell.names)]
@@ -125,7 +125,7 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
             out.sim.sub * adj.w.sub
         } %>% t()
     if (!is.null(hot.spts)) {
-	hot.spts <- hot.spts <= 0.01
+        hot.spts <- hot.spts <= p.cut
         hot.spts.flat <- hot.spts[names(spot.name), cell.names] %>%
             `colnames<-`(names(cell.names)) %>%
             t()
@@ -194,35 +194,38 @@ selectByProb <- function(sp.score, sc.score) {
 #' @description Performs feature selection and data integration between spatial transcriptomics (ST) and single-cell (SC) data.
 #' @param sp.obj Seurat object containing ST data.
 #' @param sc.obj Seurat object containing SC data.
-#' @param n.features Number of features to select for integration.
+#' @param n.features Number of features to select for integration. Default: 3000.
 #' @param verbose Boolean indicating whether to display verbose messages during processing. Default: TRUE.
 #' @return A list containing integrated Seurat objects for SC (`sc.int`) and ST (`st.int`) data.
 
-featureSelelction <- function(sp.obj, sc.obj, n.features, verbose = TRUE) {
-    if (sc.obj@active.assay != "SCT") {
-        sc.obj <- SCTransform(sc.obj, verbose = verbose, method = "glmGamPoi")
+featureSelelction <- function(sp.obj, sc.obj, n.features = 3000, assay = "RNA", verbose = TRUE) {
+    if (assay == "RNA") {
+        DefaultAssay(sc.obj) <- "RNA"
+        DefaultAssay(sp.obj) <- "Spatial"
+        sp.obj <- NormalizeData(sp.obj, verbose = verbose)
+        sc.obj <- NormalizeData(sc.obj, verbose = verbose)
     }
     ifnb.list <- list(SC = sc.obj, ST = sp.obj)
     features <- SelectIntegrationFeatures(object.list = ifnb.list, nfeatures = n.features, verbose = verbose)
     sc.st.anchors <- Seurat::FindTransferAnchors(
         reference = sc.obj,
         query = sp.obj,
-        reference.assay = "SCT",
-        query.assay = "SCT",
+        reference.assay = assay,
+        query.assay = ifelse(assay == "RNA", "Spatial", "SCT"),
         features = features,
         reduction = "cca",
         verbose = verbose
     )
     st.data.trans <- Seurat::TransferData(
         anchorset = sc.st.anchors,
-        refdata = GetAssayData(sc.obj, assay = "SCT", slot = "data")[features, ],
+        refdata = GetAssayData(sc.obj, assay = assay, slot = "data")[features, ],
         weight.reduction = "cca",
         verbose = verbose
     )
     sp.obj@assays$transfer <- st.data.trans
 
     st.vv <- data.frame(sp.obj[["transfer"]]@data) %>% `colnames<-`(colnames(sp.obj))
-    sc.vv <- data.frame(sc.obj[["SCT"]]@data[features, ]) %>% `colnames<-`(colnames(sc.obj))
+    sc.vv <- data.frame(sc.obj[[assay]]@data[features, ]) %>% `colnames<-`(colnames(sc.obj))
     counts.temp <- cbind(st.vv, sc.vv)
     sc.st.int <- CreateSeuratObject(counts = counts.temp, assay = "traint")
     sc.st.int[["traint"]]@data <- sc.st.int[["traint"]]@counts
@@ -277,18 +280,68 @@ mergeClusters <- function(sp.obj, num.cells, max.block.size = 20000) {
     return(idx.merg)
 }
 
+
+#' @title hclustPartition
+#'
+#' @param netx.pred A data.frame of probabilities inferred from FNN model.
+#' @param sp.obj Seurat object containing ST data.
+#' @param sc.obj Seurat object containing SC data.
+#' @param st.prop Estimated proportions for ST spots.
+#' @param num.cells A vector of cell counts in spots
+#' @return A list of single cells partitioned into sub-clusters.
+
+hclustPartition <- function(netx.pred, sp.obj, sc.obj, st.prop, num.cells) {
+    sp.obj.sub <- sp.obj[, rownames(st.prop)]
+    spot.sub <- colnames(sp.obj.sub)[Idents(sp.obj.sub) == "0"]
+    total.cnts <- num.cells[spot.sub] %>% sum()
+    re.assig <- round({
+        colSums(st.prop[spot.sub, ]) / sum(colSums(st.prop[spot.sub, ]))
+    } * total.cnts)
+    re.assig[which.max(re.assig)] <- re.assig[which.max(re.assig)] + total.cnts - sum(re.assig)
+    max.cells <- table(Idents(sc.obj))[names(re.assig)]
+    diff.cnts <- re.assig - max.cells
+    adj.cnts <- diff.cnts[which(diff.cnts > 0)]
+    ii <-
+        {
+            -diff.cnts - adj.cnts
+        } %>%
+        .[order(.)] %>%
+        {
+            names(.)[which(. >= 0)[1]]
+        }
+    re.assig[ii] <- re.assig[ii] + sum(adj.cnts)
+    re.assig[names(adj.cnts)] <- re.assig[names(adj.cnts)] - adj.cnts
+
+    keep.cells <- lapply(levels(sc.obj), function(xx) {
+        sc.cells <- Idents(sc.obj)[Idents(sc.obj) == xx] %>% names()
+        cnt <- re.assig[xx]
+        if (cnt > 0) {
+            netx.pred.sub <- netx.pred[sc.cells, , drop = FALSE]
+            keep.cells <- rownames(netx.pred.sub)[order(-netx.pred.sub[, 1])] %>% .[1:cnt]
+        } else {
+            keep.cells <- NA
+        }
+    }) %>%
+        unlist() %>%
+        as.vector() %>%
+        .[!is.na(.)]
+    return(list("0" = keep.cells, "1" = setdiff(colnames(sc.obj), keep.cells)))
+}
+
 #' @title partitionClusters
 #'
 #' @description Partition single cells into sub-clusters using a deep learning strategy based on integration of spatial transcriptomics (ST) and single-cell (SC) data.
 #' @param sp.obj Seurat object containing ST data.
 #' @param sc.obj Seurat object containing SC data.
 #' @param num.cells A vector of cell counts in spots.
+#' @param hot.spts Data frame indicating hotspot presence in spots and cell types.
 #' @param hclust Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.
+#' @param st.prop Estimated proportions for ST spots.
 #' @return A list of single cells partitioned into sub-clusters.
 #' @export partitionClusters
 
-partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE) {
-    sc.st.int <- featureSelelction(sp.obj, sc.obj, n.features = 3000, verbose = FALSE)
+partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclust = TRUE) {
+    sc.st.int <- featureSelelction(sp.obj, sc.obj, verbose = FALSE)
     sc.int <- sc.st.int$sc
     sp.int <- sc.st.int$st
     python.script <- system.file("python/netx.py", package = "Cell2Spatial")
@@ -311,6 +364,10 @@ partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE
     netx.pred <- runNetModel(sc.embeddings, sp.embeddings, as.integer(labels), epochs = 1000) %>%
         `rownames<-`(colnames(sc.int)) %>%
         `colnames<-`(levels(sp.obj))
+    if (hclust && length(levels(sc.obj)) > 1 && length(levels(sp.obj)) == 2) {
+        index.lst <- hclustPartition(netx.pred, sp.obj, sc.obj, st.prop, num.cells)
+        return(list(PARTION = index.lst, CLUSTER = labels))
+    }
 
     target.counts <- lapply(levels(sp.obj), function(xx) {
         spots <- Idents(sp.obj)[Idents(sp.obj) == xx] %>% names()
@@ -319,7 +376,7 @@ partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE
         unlist() %>%
         `names<-`(levels(sp.obj))
 
-    #netx.pred <- weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
+    # netx.pred <- weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
     netx.pred.scale <- sweep(netx.pred, MARGIN = 1, apply(netx.pred, 1, max), "/")
     max.idxes <- apply(netx.pred, 1, which.max) %>%
         colnames(netx.pred)[.] %>%
@@ -378,17 +435,18 @@ partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, hclust = TRUE
 #' @param adj.w Weight matrix for adjusting similarity scores.
 #' @param num.cells A vector indicating the cell count per spot projected to spots.
 #' @param hot.spts Data frame indicating hotspot presence in spots and cell types.
+#' @param st.prop Estimated proportions for ST spots.
 #' @param partition Logical indicating whether to split into sub-modules mapped to spatial positions.
 #' @param hclust Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.
 #' @return A list of assigned cells corresponding to spots.
 #' @export linearSumAssignment
 
-linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, partition, hclust = TRUE) {
+linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.spts, st.prop, partition, hclust = TRUE) {
     if (partition) {
-        index.lst <- partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, hclust = hclust)
+        index.lst <- partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclust = hclust)
     } else {
         if (nrow(out.sim) > 30000) {
-            index.lst <- partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, hclust = hclust)
+            index.lst <- partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclust = hclust)
         } else {
             index.lst <- list(ENTIRE = NULL)
         }
@@ -409,14 +467,14 @@ linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.s
         cell.names <- Idents(sc.obj)[colnames(out.sim.sub)]
         out.sim.sub <- weightSimScore(out.sim.sub, adj.w, spot.name, cell.names, hot.spts)
 
-	tmp.dir <- tempdir()
+        tmp.dir <- tempdir()
         sim.file <- file.path(tmp.dir, sprintf("sim_%s.xls", cls))
         num.file <- file.path(tmp.dir, sprintf("num_%s.xls", cls))
         data.table::fwrite(as.data.frame(out.sim.sub) * (-1), file = sim.file)
         data.table::fwrite(as.data.frame(num.cells[colnames(out.sim.sub)]), file = num.file)
 
         python.script <- system.file("python/solve.py", package = "Cell2Spatial")
-	system(sprintf("python %s %s %s %s %s", python.script, tmp.dir, sim.file, num.file, cls))
+        system(sprintf("python %s %s %s %s %s", python.script, tmp.dir, sim.file, num.file, cls))
 
         index <- read.table(file.path(tmp.dir, paste0(cls, "_output.txt"))) + 1
         spot.ids <- colnames(out.sim.sub)[index[, 1]]
