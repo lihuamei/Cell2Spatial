@@ -223,3 +223,6 @@ loaded via a namespace (and not attached):
 [185] globals_0.16.3              concaveman_1.1.0
 
 ```
+
+## 8. Contact us
+Please feel free to contact us at the following email address: li_hua_mei@163.com.
