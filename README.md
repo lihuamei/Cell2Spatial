@@ -95,7 +95,7 @@ sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "liger_ident_coarse", 
 SpatialPlot(sce, group.by = 'Cell2Spatial', pt.size.factor = 1.0, stroke = NA)
 ```
 <p align="center">
-        <img src="vignette_files/cerebellum.jpg" alt="Resized Image" width="800">
+        <img src="vignette_files/cerebellum.jpg" alt="Resized Image" width="500">
 </p>
 
 ## 6. Session infos
