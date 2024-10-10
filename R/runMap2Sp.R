@@ -135,7 +135,7 @@ runCell2Spatial <- function(sp.obj,
     )
     garbageCollection(sp.score, sc.score)
 
-    println(sprintf("Assigning %g single-cells to spots and generating spatial coordinates", sum(num.cells)))
+    println(sprintf("Assigning %g single-cells to spots and generating spatial coordinates", sum(num.cells)), verbose = verbose)
     suppressWarnings({
         out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.pvals, st.prop, partition, hclust)
     })
