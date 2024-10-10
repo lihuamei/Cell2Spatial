@@ -52,7 +52,7 @@ sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% re
 
 ```
 
-## 4. Assigning single cells to spatial spots for reconstructing tissue architectures
+## 4. Assign single cells to spatial spots for reconstructing tissue architectures
 ```r
 sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", resolution = 0.8, fix.cells.in.spot = 10)
 
