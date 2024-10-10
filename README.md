@@ -57,13 +57,13 @@ sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% re
 sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", resolution = 0.8, fix.cells.in.spot = 10)
 
 ```
-<div style="text-align: justify;font-size: 0.2em;">
+<div style="text-align: justify;font-size: 8px;">
     <ul>
         <li>
             <strong>Cell Data Configuration:</strong> When working with low-resolution ST data, setting the maximum number of cells per spot (<b> max.cells.in.spot </b>) allows Cell2Spatial to automatically estimate the cell count for each spot. This strategy helps ensure the inferred cell number closely aligns with the actual number in the tissue slice. Alternatively, you can set a fixed cell count per spot (`fix.cells.in.spot`) to more clearly observe the spatial distribution of different cell types in the tissue.
         </li>
         <li>
-            <strong>Non-matching Samples:</strong> You can configure the `hotspot.detection.threshold` (range: 0-1, with a significance level of 0.05) to detect hot spots corresponding to different cell types and filter out spots that do not contain any cell types from the SC dataset. This helps address cases of unmatched data. For perfectly matched samples, setting the `hotspot.detection.threshold` to 1 allows for a better visualization of the reconstructed spatial architecture.
+            <strong>Non-matching Samples:</strong> You can configure the </b> hotspot.detection.threshold </b> (range: 0-1, with a significance level of 0.05) to detect hot spots corresponding to different cell types and filter out spots that do not contain any cell types from the SC dataset. This helps address cases of unmatched data. For perfectly matched samples, setting the <b> hotspot.detection.threshold </b> to 1 allows for a better visualization of the reconstructed spatial architecture.
         </li>
     </ul>
 </div>
