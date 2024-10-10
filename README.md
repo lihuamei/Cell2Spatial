@@ -92,7 +92,11 @@ sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.
 sc.obj <- readRDS("your_path/cerebellum_SC.RDS")
 sp.obj <- readRDS("your_path/cerebellum_ST.RDS")
 sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "liger_ident_coarse", signature.scoring.method = 'UCell', verbose = T, fix.cells.in.spot = 1)
+SpatialPlot(sce, group.by = 'Cell2Spatial', pt.size.factor = 1.0, stroke = NA)
 ```
+<p align="center">
+        <img src="vignette_files/cerebellum.jpg" alt="Resized Image" width="800">
+</p>
 
 ## 6. Session infos
 ```r
