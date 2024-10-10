@@ -4,7 +4,7 @@ Cell2Spatial is a sophisticated tool specifically designed for decoding spatial 
 	<img src="vignette_files/overview.png" alt="Resized Image" width="800">
 </p>
 
-In this tutorial, we'll showcase the installation and usage of Cell2Spatial, allowing precise interpretation of spatial transcriptomic spots at a single-cell granularity.
+In this tutorial, we'll showcase the installation and usage of `Cell2Spatial`, allowing precise interpretation of spatial transcriptomic spots at a single-cell granularity.
 
 ## 1. Essential dependencies
 
