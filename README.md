@@ -87,6 +87,12 @@ sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.
 # coord.label: Specify the coordinates informative column names  keep in coord.df data.frame.
 
 ```
+- Assign single cells to spatial spots by setting `max.cells.in.spot = 1`. For example, apply this to mouse cerebellum data (https://singlecell.broadinstitute.org/single_cell/study/SCP948).
+
+```r
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "liger_ident_coarse", signature.scoring.method = 'UCell', verbose = T, fix.cells.in.spot=2)
+
+```
 
 ## 6. Session infos
 ```r
