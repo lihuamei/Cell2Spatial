@@ -91,7 +91,7 @@ sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.
 ```r
 sc.obj <- readRDS("your_path/cerebellum_SC.RDS")
 sp.obj <- readRDS("your_path/cerebellum_ST.RDS")
-sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "liger_ident_coarse", signature.scoring.method = 'UCell', verbose = T, max.cells.in.spot = 1)
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "liger_ident_coarse", max.cells.in.spot = 1, signature.scoring.method = 'UCell', verbose = TRUE)
 SpatialPlot(sce, group.by = 'Cell2Spatial', pt.size.factor = 1.0, stroke = NA)
 ```
 <p align="center">
