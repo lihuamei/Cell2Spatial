@@ -38,7 +38,7 @@ install_github("lihuamei/Cell2Spatial")
 
 ```
 ## 3. Loading the packages and datasets (including scRNA-seq and ST data)
-- **10x Visium low-resolution spatial data as an exmaple**
+- **10x Visium low-resolution spatial data of mouse kindney as an exmaple**
 ``` r
 library(Cell2Spatial)
 library(Seurat)
