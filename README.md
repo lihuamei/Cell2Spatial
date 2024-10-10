@@ -10,6 +10,7 @@ In this tutorial, we'll showcase the installation and usage of Cell2Spatial, all
 
 The Cell2Spatial's code comprises both R and Python components, necessitating essential dependencies.
 * **Python (v3.8.17)**
+</br>
 |----------|-----------------------------------------|
 |**Package**|keras|lapjv|numpy|pandas|scikit_learn|tensorflow|
 |**Version**|2.13.1|1.3.24|1.24.3|2.0.3|1.3.2|2.13.1|
