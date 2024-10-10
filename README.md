@@ -57,7 +57,7 @@ sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% re
 sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", resolution = 0.8, fix.cells.in.spot = 10)
 
 ```
-<div style="text-align: justify;font-size: 0.6em;">
+<div style="text-align: justify;font-size: 0.2em;">
     <ul>
         <li>
             <strong>Cell Data Configuration:</strong> When working with low-resolution ST data, setting the maximum number of cells per spot (`max.cells.in.spot`) allows Cell2Spatial to automatically estimate the cell count for each spot. This strategy helps ensure the inferred cell number closely aligns with the actual number in the tissue slice. Alternatively, you can set a fixed cell count per spot (`fix.cells.in.spot`) to more clearly observe the spatial distribution of different cell types in the tissue.
