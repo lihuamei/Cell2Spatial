@@ -86,7 +86,7 @@ sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.
 # coord.df: Data frame of spot coordinates, with row names representing spot barcodes.
 # coord.label: Specify the coordinates informative column names  keep in coord.df data.frame.
 ```
-- Assign single cells to spatial spots by setting `max.cells.in.spot = 1`. For example, apply this to mouse cerebellum Slide-seq2 data (https://singlecell.broadinstitute.org/single_cell/study/SCP948).
+- Assign single cells to spatial spots by setting `max.cells.in.spot = 1`. For example, apply this to **mouse cerebellum Slide-seq2 data** (https://singlecell.broadinstitute.org/single_cell/study/SCP948).
 
 ```r
 sc.obj <- readRDS("your_path/cerebellum_SC.RDS")
