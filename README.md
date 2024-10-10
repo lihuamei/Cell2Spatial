@@ -77,6 +77,18 @@ gp1 + gp2
 	<img src="vignette_files/mapping_results.png" alt="Resized Image" width="800">
 </p>
 
+## 7. For high-resolution spatial data (such as Slide-seq2 and Image-based ST platform)
+- Reformat ST data from various platforms to fit Cell2Spatial's requirements using the `createSpatialObject` function, an example as follows.
+
+``` r
+sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.data = meta.data)
+
+# counts: Count matrix with genes as rows and spot barcodes as columns.
+# coord.df: Data frame of spot coordinates, with row names representing spot barcodes.
+# coord.label: Specify the coordinates informative column names  keep in coord.df data.frame.
+
+```
+
 ## 6. Session infos
 ```r
 > sessionInfo()
