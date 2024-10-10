@@ -90,7 +90,10 @@ sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.
 - Assign single cells to spatial spots by setting `max.cells.in.spot = 1`. For example, apply this to mouse cerebellum data (https://singlecell.broadinstitute.org/single_cell/study/SCP948).
 
 ```r
-sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "liger_ident_coarse", signature.scoring.method = 'UCell', verbose = T, fix.cells.in.spot=2)
+sc.obj <- readRDS("your_path/cerebellum_SC.RDS")
+sp.obj <- readRDS("your_path/cerebellum_ST.RDS")
+
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "liger_ident_coarse", signature.scoring.method = 'UCell', verbose = T, fix.cells.in.spot = 1)
 
 ```
 
