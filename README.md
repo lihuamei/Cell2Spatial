@@ -77,7 +77,7 @@ gp1 + gp2
 	<img src="vignette_files/mapping_results.png" alt="Resized Image" width="800">
 </p>
 
-## 7. High-resolution spatial data (such as Slide-seq2 and Image-based ST platform)
+## 7. High-resolution spatial data (such as Slide-seq2 and Image-based ST platforms)
 - Reformat ST data from various platforms to fit Cell2Spatial's requirements using the `createSpatialObject` function, an example as follows.
 
 ``` r
