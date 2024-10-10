@@ -82,7 +82,6 @@ gp1 + gp2
 
 ``` r
 sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.data = meta.data)
-
 # counts: Count matrix with genes as rows and spot barcodes as columns.
 # coord.df: Data frame of spot coordinates, with row names representing spot barcodes.
 # coord.label: Specify the coordinates informative column names  keep in coord.df data.frame.
