@@ -61,7 +61,7 @@ sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", resolutio
 
 - **Non-matching Samples:** Adjust `hotspot.detection.threshold` (0-1, significance level 0.05) to detect cell-type-specific hot spots and filter unmatched spots. Set it to 1 for better visualization with perfectly matched samples.
 
-### 5. Visualization of mapping results.
+### 5. Visualization of mapping results
 
 ``` r
 sc.obj <- SCTransform(sc.obj, ncells = 3000, verbose = FALSE) %>% RunPCA(verbose = FALSE) %>% RunUMAP(dims = 1 : 30, verbose = FALSE)
