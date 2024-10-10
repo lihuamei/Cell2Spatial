@@ -20,8 +20,14 @@ The Cell2Spatial's code comprises both R and Python components, necessitating es
 </div>
 
 * **R (v4.4.1)**
-	* reticulate
-	* Seurat
+
+<div align= "center">
+
+| **Package**      | Seurat  | SeuratObject   | reticulate | sctransform  | MatrixGenerics | stringr  | UCell | MASS | glmGamPoi |
+| ---------------- | ------ | ------- | ------- | ------- | ------------ | ---------- | ------ | ---- | ------ |
+| **Version**      | 4.3.0 | 4.1.3 | 1.38.0 | 0.4.1 | 1.16.0 | 1.5.1 | 2.8.0 | 7.3-61 | 1.16.0 |
+
+</div>
 
 ## 2. Installation
 
