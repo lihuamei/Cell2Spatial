@@ -64,9 +64,8 @@ sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", resolutio
 ### 5. Visualization of mapping results.
 
 ``` r
-sc.obj <- SCTransform(sc.obj, ncells = 3000, verbose = FALSE) %>%
-    RunPCA(verbose = FALSE) %>%
-    RunUMAP(dims = 1 : 30, verbose = FALSE)
+sc.obj <- SCTransform(sc.obj, ncells = 3000, verbose = FALSE) %>% RunPCA(verbose = FALSE) %>% RunUMAP(dims = 1 : 30, verbose = FALSE)
+
 ```
 ``` r
 set.seed(2023063)
