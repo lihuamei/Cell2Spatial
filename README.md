@@ -57,9 +57,9 @@ sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% re
 sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", resolution = 0.8, fix.cells.in.spot = 10)
 
 ```
-- **Cell Data Configuration:** When working with low-resolution ST data, setting the maximum number of cells per spot (`max.cells.in.spot`) allows Cell2Spatial to automatically estimate the cell count for each spot. This strategy helps ensure the inferred cell number closely aligns with the actual number in the tissue slice. Alternatively, you can set a fixed cell count per spot (`fix.cells.in.spot`) to more clearly observe the spatial distribution of different cell types in the tissue.
+- **Cell Data Configuration:** For low-resolution ST data, set `max.cells.in.spot` to estimate cell count per spot or use `fix.cells.in.spot` to observe cell type distribution more clearly.
 
-- **Non-matching Samples:** You can configure the `hotspot.detection.threshold` (range: 0-1, with a significance level of 0.05) to detect hot spots corresponding to different cell types and filter out spots that do not contain any cell types from the SC dataset. This helps address cases of unmatched data. For perfectly matched samples, setting the `hotspot.detection.threshold` to 1 allows for a better visualization of the reconstructed spatial architecture.
+- **Non-matching Samples:** Adjust `hotspot.detection.threshold` (0-1, significance level 0.05) to detect cell-type-specific hot spots and filter unmatched spots. Set it to 1 for better visualization with perfectly matched samples.
 
 ### 5. Visualization of mapping results.
 
