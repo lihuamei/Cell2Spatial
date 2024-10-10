@@ -82,7 +82,7 @@ dectHotSpotsByTtest <- function(sp.obj, sp.score, knn = 5, p.value.threshold = 0
         do.call(rbind, .) %>%
         `rownames<-`(rownames(sp.score))
     hotspot.spots <- spot.pvals <= p.value.threshold
-    return(list(x = hotspot.spots, y = p.values))
+    return(list(x = hotspot.spots, y = spot.pvals))
 }
 
 #' @title dectHotSpotsByGetisOrdGi
