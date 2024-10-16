@@ -377,7 +377,7 @@ partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclu
         unlist() %>%
         `names<-`(levels(sp.obj))
 
-    # netx.pred <- weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
+    netx.pred <- weigthNetProb(netx.pred, sc.obj, sp.obj, hot.spts)
     netx.pred.scale <- sweep(netx.pred, MARGIN = 1, apply(netx.pred, 1, max), "/")
     max.idxes <- apply(netx.pred, 1, which.max) %>%
         colnames(netx.pred)[.] %>%
