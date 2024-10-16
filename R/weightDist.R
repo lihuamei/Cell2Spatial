@@ -71,7 +71,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, verb
     obj <- IntegrateData(anchorset = anchors, normalization.method = "LogNormalize", k.weight = 30, verbose = verbose)
     obj <- ScaleData(obj, verbose = verbose)
     obj <- RunPCA(obj, verbose = verbose)
-    obj <- RunUMAP(obj, reduction = "pca", dims = 1:npcs, verbose = verbose)
+    obj <- RunUMAP(obj, reduction = "pca", dims = 1:npcs, reduction.key = "UMAP_", verbose = verbose)
     return(obj)
 }
 
