@@ -251,7 +251,8 @@ mergeClusters <- function(sp.obj, num.cells, max.block.size = 20000) {
     }) %>%
         unlist() %>%
         `names<-`(levels(sp.obj))
-    X <- AggregateExpression(sp.obj, assays = DefaultAssay(sp.obj), slot = "data", group.by = "seurat_clusters")[[1]]
+    X <- AggregateExpression(sp.obj, assays = DefaultAssay(sp.obj), slot = "data", group.by = "seurat_clusters")[[1]] %>% as.data.frame
+    colnames(X) <- gsub("g", '', colnames(X))
     X <- X[VariableFeatures(sp.obj), ]
     hclust1 <- dist(t(X)) %>% hclust(.)
     cut.bins <- 2
