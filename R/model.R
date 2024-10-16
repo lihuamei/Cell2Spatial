@@ -224,11 +224,19 @@ featureSelelction <- function(sp.obj, sc.obj, n.features = 3000, assay = "RNA", 
     )
     sp.obj@assays$transfer <- st.data.trans
 
-    st.vv <- data.frame(sp.obj[["transfer"]]$data) %>% `colnames<-`(colnames(sp.obj))
-    sc.vv <- data.frame(sc.obj[[assay]]$data[features, ]) %>% `colnames<-`(colnames(sc.obj))
-    counts.temp <- cbind(st.vv, sc.vv)
-    sc.st.int <- CreateSeuratObject(counts = counts.temp, assay = "traint")
-    sc.st.int[["traint"]]$data <- sc.st.int[["traint"]]$counts
+    if (sc.obj@version >= "5.0") {
+        st.vv <- data.frame(sp.obj[["transfer"]]$data) %>% `colnames<-`(colnames(sp.obj))
+        sc.vv <- data.frame(sc.obj[[assay]]$data[features, ]) %>% `colnames<-`(colnames(sc.obj))
+        counts.temp <- cbind(st.vv, sc.vv)
+        sc.st.int <- CreateSeuratObject(counts = counts.temp, assay = "traint")
+        sc.st.int[["traint"]]$data <- sc.st.int[["traint"]]$counts
+    } else {
+        st.vv <- data.frame(sp.obj[["transfer"]]@data) %>% `colnames<-`(colnames(sp.obj))
+        sc.vv <- data.frame(sc.obj[[assay]]@data[features, ]) %>% `colnames<-`(colnames(sc.obj))
+        counts.temp <- cbind(st.vv, sc.vv)
+        sc.st.int <- CreateSeuratObject(counts = counts.temp, assay = "traint")
+        sc.st.int[["traint"]]@data <- sc.st.int[["traint"]]@counts
+    }
     sc.st.int <- ScaleData(sc.st.int, features = features, verbose = verbose) %>% RunPCA(features = features, verbose = verbose)
     sc.int <- subset(sc.st.int, cells = colnames(sc.obj))
     st.int <- subset(sc.st.int, cells = colnames(sp.obj))
@@ -251,8 +259,8 @@ mergeClusters <- function(sp.obj, num.cells, max.block.size = 20000) {
     }) %>%
         unlist() %>%
         `names<-`(levels(sp.obj))
-    X <- AggregateExpression(sp.obj, assays = DefaultAssay(sp.obj), slot = "data", group.by = "seurat_clusters")[[1]] %>% as.data.frame
-    colnames(X) <- gsub("g", '', colnames(X))
+    X <- AggregateExpression(sp.obj, assays = DefaultAssay(sp.obj), slot = "data", group.by = "seurat_clusters")[[1]] %>% as.data.frame()
+    colnames(X) <- gsub("g", "", colnames(X))
     X <- X[VariableFeatures(sp.obj), ]
     hclust1 <- dist(t(X)) %>% hclust(.)
     cut.bins <- 2
