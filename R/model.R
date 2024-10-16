@@ -346,7 +346,7 @@ partitionClusters <- function(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclu
     sp.int <- sc.st.int$st
     python.script <- system.file("python/netx.py", package = "Cell2Spatial")
     command <- ifelse(.Platform$OS.type == "windows", "where", "which")
-    py.path <- system(sprintf("%s python", command), intern = TRUE)
+    py.path <- system(sprintf("%s python", command), intern = TRUE)[1]
     reticulate::use_python(py.path)
     source_python(python.script)
 
