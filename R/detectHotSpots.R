@@ -11,7 +11,15 @@
 getGsetScore <- function(obj.seu, sc.markers, assay = "SCT", method = c("AddModuleScore", "UCell", "AverageExpr")) {
     score.df <- switch(match.arg(method),
         AddModuleScore = {
-            obj.seu <- Seurat::AddModuleScore(obj = obj.seu, assay = assay, features = sc.markers, name = "CELL2SPATIAL")
+            obj.seu <- tryCatch(
+                {
+                    obj.seu <- Seurat::AddModuleScore(obj = obj.seu, assay = assay, features = sc.markers, name = "CELL2SPATIAL")
+                },
+                error = function(e) {
+                    obj.seu <- Seurat::AddModuleScore(obj = obj.seu, assay = assay, features = sc.markers, name = "CELL2SPATIAL", nbin = 10)
+                }
+            )
+
             score.df <- obj.seu@meta.data[, grep("CELL2SPATIAL", colnames(obj.seu@meta.data)), drop = FALSE]
             colnames(score.df) <- names(sc.markers)[1:ncol(score.df)]
             return(score.df)
