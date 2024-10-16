@@ -16,6 +16,7 @@ psedoSpotExprUseSC <- function(sc.obj, sp.obj, pseu.cnt = 200, lamba = 5, mc.cor
         median(.)
     count.mat <- GetAssayData(sc.obj, slot = "count") %>% as.matrix()
     cell.lst <- split(colnames(sc.obj), Idents(sc.obj) %>% as.vector())
+    mc.cores <- ifelse(.Platform$OS.type == "windows", 1, mc.cores)
     syn.spot <- parallel::mclapply(ctypes, function(ct) {
         syn.spot <- lapply(1:pseu.cnt, function(xx) {
             ct.tmp <- sample(cell.lst[[ct]], lamba, replace = TRUE)
