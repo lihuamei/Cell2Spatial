@@ -133,13 +133,13 @@ coExistIndex <- function(sce, min.cells = 0) {
     } else {
         meta.data <- SingleCellExperiment::colData(sce)
     }
-    tar.cells <- meta.data$CellType %>%
+    tar.cells <- meta.data$Cell2Spatial %>%
         table() %>%
         {
             . > min.cells
         } %>%
         names()
-    df.mat <- table(meta.data$CellType, meta.data$centerSPOT) %>%
+    df.mat <- table(meta.data$Cell2Spatial, meta.data$centerSPOT) %>%
         t() %>%
         as.data.frame.matrix() %>%
         .[, tar.cells]
