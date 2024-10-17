@@ -43,8 +43,8 @@ install_github("lihuamei/Cell2Spatial")
 library(Cell2Spatial)
 library(Seurat)
 library(dplyr)
-library(randomcoloR)
 library(tidydr)
+library(randomcoloR)
 ```
 ``` r
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
