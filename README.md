@@ -84,7 +84,7 @@ gp1 + gp2
 sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.data = meta.data)
 # counts: Count matrix with genes as rows and spot barcodes as columns.
 # coord.df: Data frame of spot coordinates, with row names representing spot barcodes.
-# coord.label: Specify the coordinates informative column names  keep in coord.df data.frame.
+# coord.label: Specify the coordinates informative column names keep in coord.df data.frame.
 ```
 - Assign single cells to spatial spots by setting `max.cells.in.spot = 1`. For example, apply this to **mouse cerebellum Slide-seq2 data** (https://singlecell.broadinstitute.org/single_cell/study/SCP948).
 
