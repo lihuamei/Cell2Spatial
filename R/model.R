@@ -145,7 +145,7 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.spts = NUL
 #' @return Adjusted network predictions matrix where weights are applied based on cell type proportions and hotspot information.
 
 weigthNetProb <- function(netx.pred, sc.obj, sp.obj, hot.spts) {
-    hot.spts <- hot.spts <= 0.01
+    hot.spts <- hot.spts <= 0.05
     hot.spts.new <- cbind.data.frame(hot.spts, CLUSTER = Idents(sp.obj)[rownames(hot.spts)])
     cluster.summary <- hot.spts.new %>%
         pivot_longer(cols = -CLUSTER, names_to = "Cell_Type", values_to = "Count") %>%
@@ -157,7 +157,7 @@ weigthNetProb <- function(netx.pred, sc.obj, sp.obj, hot.spts) {
         .[, -1, drop = FALSE] %>%
         sweep(., 2, colSums(.), "/") %>%
         t()
-
+    cluster.summary[is.na(cluster.summary)] <- 0
     sc.types <- Idents(sc.obj) %>%
         as.vector() %>%
         `names<-`(colnames(sc.obj))
