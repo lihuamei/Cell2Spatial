@@ -15,11 +15,11 @@ plotSc2Spatial <- function(sp.obj, sce, tar.ctypes = NULL, pt.size = 1.0, colors
     pseud.coord <- sce@colData %>% as.data.frame()
     img <- sp.obj@images[[names(sp.obj@images)]]@image
     if (!is.null(tar.ctypes)) {
-        tar.ctypes.sub <- intersect(tar.ctypes, pseud.coord$CellType %>% unique())
+        tar.ctypes.sub <- intersect(tar.ctypes, pseud.coord$Cell2Spatial %>% unique())
         if (length(tar.ctypes.sub) == 0) println("No cell types found in sce data, exiting...", status = "ERROR")
-        pseud.coord <- subset(pseud.coord, CellType %in% tar.ctypes.sub)
+        pseud.coord <- subset(pseud.coord, Cell2Spatial %in% tar.ctypes.sub)
     }
-    tar.ctypes <- pseud.coord$CellType %>% unique()
+    tar.ctypes <- pseud.coord$Cell2Spatial %>% unique()
     if (!is.null(colors) && is.null(names(colors))) {
         colors <- colors[1:length(tar.ctypes)] %>% `names<-`(tar.ctypes)
     } else {
@@ -28,15 +28,15 @@ plotSc2Spatial <- function(sp.obj, sce, tar.ctypes = NULL, pt.size = 1.0, colors
     colors <- colors[tar.ctypes]
 
     if (!is.null(percent) && percent > 0 && percent <= 1) {
-        pseud.coord <- lapply(pseud.coord$CellType %>% unique(), function(ct) {
-            df <- subset(pseud.coord, CellType == ct)
+        pseud.coord <- lapply(pseud.coord$Cell2Spatial %>% unique(), function(ct) {
+            df <- subset(pseud.coord, Cell2Spatial == ct)
             int.idx <- sample(nrow(df), floor(nrow(df) * percent))
             df[int.idx, ]
         }) %>%
             do.call(rbind, .) %>%
             as.data.frame()
     }
-    gp <- ggplot(pseud.coord, aes(x = y, y = x, fill = CellType)) +
+    gp <- ggplot(pseud.coord, aes(x = y, y = x, fill = Cell2Spatial)) +
         annotation_raster(img, xmin = 0, xmax = ncol(img), ymin = 0, ymax = -nrow(img)) +
         geom_point(shape = shape, size = pt.size) +
         ggplot2::scale_y_reverse() +
