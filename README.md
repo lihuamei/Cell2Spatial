@@ -57,7 +57,7 @@ sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% re
 sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", resolution = 0.8, fix.cells.in.spot = 10)
 
 ```
-- **Cell Data Configuration:** For low-resolution ST data, set `max.cells.in.spot` to estimate cell count per spot or use `fix.cells.in.spot` to observe cell type distribution more clearly.
+- **Cell Data Configuration:** For low-resolution ST data, set `max.cells.in.spot` to estimate cell count per spot, or use `fix.cells.in.spot` to observe cell type distribution more clearly.
 
 - **Non-matching Samples:** Adjust `hotspot.detection.threshold` (0-1, significance level 0.05) to detect cell-type-specific hot spots and filter unmatched spots. Set it to 1 for better visualization with perfectly matched samples.
 
