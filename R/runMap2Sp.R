@@ -4,11 +4,12 @@
 #' @param sp.obj Seurat object of spatial transcriptome (ST) data.
 #' @param sc.obj Seurat object of single-cell (SC) data.
 #' @param cell.type.column Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.
+#' @param spot.clst.column Specify the column name for the spot clusters in the meta.data slot of the ST Seurat object. Default: NULL.
 #' @param sample.size Down-sample a small subset of SC data for mapping to ST coordinates. Default: NULL.
 #' @param sc.markers When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.
 #' @param marker.selection.method Method for selecting cell-type specific markers when `sc.markers = NULL`: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.
 #' @param group.size Specify the marker size for each subset derived from single-cell data. Default: 30.
-#' @param resolution Resolution for clustering ST spots. Default: 0.8.
+#' @param resolution Resolution for clustering ST spots when spot.clst.column = NULL. Default: 0.8.
 #' @param knn Utilize the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.
 #' @param partition Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: FALSE.
 #' @param max.cells.in.spot Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set `max.cells.in.spot` to 1.
@@ -19,6 +20,7 @@
 #' @param integ.entire.dataset Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: FALSE.
 #' @param feature.based Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: 'gene.based'.
 #' @param dist.method Measure the distance between single cells and spots, using maximum likelihood model (mle) or correlation (cor). Default: mle.
+#' @param quantile.cut Numeric value specifying the quantile threshold for UMAP distance scaling, ranging from 0.25 to 1. Default is 1, which considers the maximum distance for normalization. This parameter is only effective when integ.entire.dataset = TRUE.
 #' @param hclust Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.
 #' @param output.type Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.
 #' @param n.workers Number of cores for parallel processing. Default: 4.
@@ -29,10 +31,11 @@
 #' @examples
 #' sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
 #' sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% readRDS(.)
-#' sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 100)
+#' sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 100, fix.cells.in.spot = 10)
 runCell2Spatial <- function(sp.obj,
                             sc.obj,
                             cell.type.column = "idents",
+                            spot.clst.column = NULL,
                             sample.size = NULL,
                             sc.markers = NULL,
                             marker.selection.method = c("shannon", "wilcox"),
@@ -48,6 +51,7 @@ runCell2Spatial <- function(sp.obj,
                             integ.entire.dataset = FALSE,
                             feature.based = c("gene.based", "celltype.based"),
                             dist.method = c("mle", "cor"),
+                            quantile.cut = 1,
                             hclust = TRUE,
                             output.type = c("Seurat", "SingleCellExperiment"),
                             n.workers = 4,
@@ -86,16 +90,21 @@ runCell2Spatial <- function(sp.obj,
     )
     hot.spts <- hot.spts.lst$x
     keep.spots <- rownames(hot.spts)[rowSums(hot.spts) > 0]
-    println("Clustering spots for ST data and estimating the cell counts per spot", verbose = verbose)
-    suppressWarnings({
-        sp.obj <- findClustersForSpData(sp.obj, res = resolution, verbose = FALSE)
-    })
+    if (is.null(spot.clst.column)) {
+        println("Clustering spots for ST data and estimating the cell counts per spot", verbose = verbose)
+        suppressWarnings({
+            sp.obj <- findClustersForSpData(sp.obj, res = resolution, verbose = FALSE)
+        })
+    } else {
+        Idents(sp.obj) <- sp.obj@meta.data[, spot.clst.column]
+        sp.obj$seurat_clusters <- Idents(sp.obj)
+    }
     num.cells <- estCellPerSpots(sp.obj, max.cells.in.spot, fix.cells.in.spot)
 
     println("Weighting the distance between SC and ST data...", verbose = verbose)
     lamba <- median(num.cells[keep.spots])
     suppressWarnings({
-        adj.w <- weightDist(sc.obj, sp.obj, lamba, mc.cores = n.workers, use.entire = integ.entire.dataset)
+        adj.w <- weightDist(sc.obj, sp.obj, lamba, quantile.cut, mc.cores = n.workers, use.entire = integ.entire.dataset)
     })
     sp.obj <- subset(sp.obj, cells = keep.spots)
     hot.spts <- hot.spts[keep.spots, , drop = FALSE]
@@ -134,7 +143,6 @@ runCell2Spatial <- function(sp.obj,
         }
     )
     garbageCollection(sp.score, sc.score)
-
     println(sprintf("Assigning %g single-cells to spots and generating spatial coordinates", sum(num.cells)), verbose = verbose)
     suppressWarnings({
         out.sc <- linearSumAssignment(sp.obj, sc.obj, out.sim, adj.w, num.cells, hot.pvals, st.prop, partition, hclust)

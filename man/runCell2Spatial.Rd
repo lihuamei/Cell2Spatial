@@ -8,6 +8,7 @@ runCell2Spatial(
   sp.obj,
   sc.obj,
   cell.type.column = "idents",
+  spot.clst.column = NULL,
   sample.size = NULL,
   sc.markers = NULL,
   marker.selection.method = c("shannon", "wilcox"),
@@ -23,6 +24,7 @@ runCell2Spatial(
   integ.entire.dataset = FALSE,
   feature.based = c("gene.based", "celltype.based"),
   dist.method = c("mle", "cor"),
+  quantile.cut = 1,
   hclust = TRUE,
   output.type = c("Seurat", "SingleCellExperiment"),
   n.workers = 4,
@@ -36,6 +38,8 @@ runCell2Spatial(
 
 \item{cell.type.column}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
 
+\item{spot.clst.column}{Specify the column name for the spot clusters in the meta.data slot of the ST Seurat object. Default: NULL.}
+
 \item{sample.size}{Down-sample a small subset of SC data for mapping to ST coordinates. Default: NULL.}
 
 \item{sc.markers}{When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.}
@@ -44,7 +48,7 @@ runCell2Spatial(
 
 \item{group.size}{Specify the marker size for each subset derived from single-cell data. Default: 30.}
 
-\item{resolution}{Resolution for clustering ST spots. Default: 0.8.}
+\item{resolution}{Resolution for clustering ST spots when spot.clst.column = NULL. Default: 0.8.}
 
 \item{knn}{Utilize the k nearest spots to filter out spots that do not contain cell types present in the SC reference. Default: 5.}
 
@@ -66,6 +70,8 @@ runCell2Spatial(
 
 \item{dist.method}{Measure the distance between single cells and spots, using maximum likelihood model (mle) or correlation (cor). Default: mle.}
 
+\item{quantile.cut}{Numeric value specifying the quantile threshold for UMAP distance scaling, ranging from 0.25 to 1. Default is 1, which considers the maximum distance for normalization. This parameter is only effective when integ.entire.dataset = TRUE.}
+
 \item{hclust}{Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.}
 
 \item{output.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
@@ -83,5 +89,5 @@ Accurate mapping of single cells to spatial coordinates.
 \examples{
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
-sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 100)
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 100, fix.cells.in.spot = 10)
 }

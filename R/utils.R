@@ -182,7 +182,7 @@ createSpatialObject <- function(counts, coord.df, coord.label = c("x", "y"), met
         coordinates = coord.df[ovp.spots, coord.label]
     )
     if (!is.null(meta.data)) {
-        obj.seu@meta.data <- cbind.data.frame(obj.seu@meta.data, meta.data[ovp.spots, ])
+        obj.seu@meta.data <- cbind.data.frame(obj.seu@meta.data, meta.data[ovp.spots, , drop = FALSE])
     }
     return(obj.seu)
 }

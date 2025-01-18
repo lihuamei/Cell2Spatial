@@ -4,10 +4,12 @@
 \alias{adjcentScOfSPGlobal}
 \title{adjcentScOfSPGlobal}
 \usage{
-adjcentScOfSPGlobal(obj)
+adjcentScOfSPGlobal(obj, quantile.cut = 1)
 }
 \arguments{
 \item{obj}{Integrated Seurat object.}
+
+\item{quantile.cut}{Numeric value specifying the quantile threshold for distance scaling. Default is 1, which considers the maximum distance for normalization.}
 }
 \value{
 A matrix of distance weights between ST and SC.

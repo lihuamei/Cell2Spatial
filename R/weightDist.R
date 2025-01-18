@@ -139,9 +139,10 @@ adjcentScOfSP <- function(obj) {
 #'
 #' @description Generating distance matrix between ST spots and SC cells.
 #' @param obj Integrated Seurat object.
+#' @param quantile.cut Numeric value specifying the quantile threshold for distance scaling. Default is 1, which considers the maximum distance for normalization.
 #' @return A matrix of distance weights between ST and SC.
 
-adjcentScOfSPGlobal <- function(obj) {
+adjcentScOfSPGlobal <- function(obj, quantile.cut = 1) {
     umap.coord <- FetchData(obj, vars = c("UMAP_1", "UMAP_2", "Batches"))
     umap.sp <- subset(umap.coord, Batches == "ST")[, 1:2]
     umap.sc <- subset(umap.coord, Batches == "SC")[, 1:2]
@@ -152,7 +153,7 @@ adjcentScOfSPGlobal <- function(obj) {
         res.dist <- apply(umap.sc, 1, function(yy) {
             sqrt(sum((xx - yy)^2))
         })
-        res.dist <- (max(res.dist) - res.dist) / (max(res.dist) - min(res.dist))
+        res.dist <- (quantile(res.dist, quantile.cut) - res.dist) / (quantile(res.dist, quantile.cut) - min(res.dist))
     }, future.seed = TRUE) %>%
         do.call(rbind, .) %>%
         as.data.frame() %>%
@@ -167,13 +168,14 @@ adjcentScOfSPGlobal <- function(obj) {
 #' @param sc.obj Seurat object of SC data.
 #' @param sp.obj Seurat object of ST data.
 #' @param lamba Median of cell counts for spots.
+#' @param quantile.cut Numeric value specifying the quantile threshold for distance scaling. Default is 1, which considers the maximum distance for normalization.
 #' @param mc.cores Number of cores for parallel running. Default: 4
 #' @return A matrix of weighted distance matrix. Rows represent spot clusters and columns are cell types.
 
-weightDist <- function(sc.obj, sp.obj, lamba, mc.cores = 4, use.entire = TRUE) {
+weightDist <- function(sc.obj, sp.obj, lamba, quantile.cut, mc.cores = 4, use.entire = TRUE) {
     if (use.entire || length(levels(sc.obj)) == 1) {
         adj.df <- integDataBySeurat(sp.obj, sc.obj, verbose = FALSE) %>%
-            adjcentScOfSPGlobal(.)
+            adjcentScOfSPGlobal(., quantile.cut)
     } else {
         sc.syn <- psedoSpotExprUseSC(sc.obj, sp.obj, pseu.cnt = 200, lamba = lamba, mc.cores = mc.cores)
         sp.syn <- downSamplSeurat(sp.obj, cnt = 200)

@@ -4,7 +4,14 @@
 \alias{weightDist}
 \title{weightDist}
 \usage{
-weightDist(sc.obj, sp.obj, lamba, mc.cores = 4, use.entire = TRUE)
+weightDist(
+  sc.obj,
+  sp.obj,
+  lamba,
+  quantile.cut,
+  mc.cores = 4,
+  use.entire = TRUE
+)
 }
 \arguments{
 \item{sc.obj}{Seurat object of SC data.}
@@ -12,6 +19,8 @@ weightDist(sc.obj, sp.obj, lamba, mc.cores = 4, use.entire = TRUE)
 \item{sp.obj}{Seurat object of ST data.}
 
 \item{lamba}{Median of cell counts for spots.}
+
+\item{quantile.cut}{Numeric value specifying the quantile threshold for distance scaling. Default is 1, which considers the maximum distance for normalization.}
 
 \item{mc.cores}{Number of cores for parallel running. Default: 4}
 }
