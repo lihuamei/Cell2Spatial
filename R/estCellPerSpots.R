@@ -1,37 +1,62 @@
-#' @title estCellPerSpots
+#' @title inferCellNumbers
+#' @description Estimates the number of cells per spot in a spatial transcriptomics Seurat object using a corrected saturation model.
 #'
-#' @description Estimate the number of cells per spot using regression method.
-#' @param sp.obj Seurat object of spatial transcriptomics (ST) data.
-#' @param max.cells Maximum number of cells in Spots. Default: 10 (10x Genomics).
+#' @param sp.obj A Seurat object containing spatial transcriptomics data (Q matrix in the "counts" slot of the "Spatial" assay).
+#' @param max.cells Maximum number of cells assumed in any spot (default = 10).
+#' @param umi.thresh Minimum UMI count to consider a gene as expressed (default = 2).
+#' @param w.L Weight for library size in the composite score (default = 0.5).
+#' @param w.T Weight for gene count in the composite score (default = 0.5).
 #' @param fix.cells.in.spot Fixed number of cells assigned to each spot. Default: NULL.
-#' @param quantile.cut Spots with a number of UMIs greater than the quantile cutoff are set as a reference. Default: 0.95.
-#' @param num.genes Number of stable genes used in the estimation. Default: 2000.
-#' @return A vector of estimated cells per spot.
-#' @export estCellPerSpots
+#' @return A named vector of estimated cell numbers per spot.
+#' @export inferCellNumbers
 
-estCellPerSpots <- function(sp.obj, max.cells = 10, fix.cells.in.spot = NULL, quantile.cut = 0.95, num.genes = 1000) {
+inferCellNumbers <- function(sp.obj, max.cells = 10, umi.thresh = 2, w.L = 0.5, w.T = 0.5, fix.cells.in.spot = NULL) {
+    if (!inherits(sp.obj, "Seurat")) {
+        stop("Input 'sp.obj' must be a Seurat object.")
+    }
+    if (!("Spatial" %in% names(sp.obj@assays))) {
+        stop("Seurat object must contain a 'Spatial' assay.")
+    }
     if (!is.null(fix.cells.in.spot)) {
         pred.cnt <- rep(fix.cells.in.spot, ncol(sp.obj)) %>% `names<-`(colnames(sp.obj))
     } else {
         if (max.cells == 1) {
             pred.cnt <- rep(1, ncol(sp.obj)) %>% `names<-`(colnames(sp.obj))
         } else {
-            DefaultAssay(sp.obj) <- "Spatial"
-            keep.genes <- FindVariableFeatures(sp.obj, nfeatures = min(nrow(sp.obj), 5000), verbose = FALSE) %>% VariableFeatures(.)
-            count.mat <- GetAssayData(sp.obj[keep.genes, ], slot = "count", assay = "Spatial") %>% as.data.frame()
-            cor1 <- apply(count.mat, 1, function(xx) cor(sp.obj$nCount_Spatial, xx, method = "spearman"))
-            cor2 <- apply(count.mat, 1, function(xx) cor(sp.obj$nFeature_Spatial, xx, method = "spearman"))
-            cor.bak <- cor1 * cor2
-            cor.bak <- cor.bak[!is.na(cor.bak)]
-            cor.bak <- cor.bak[order(-cor.bak)]
-            genes <- names(cor.bak)[1:num.genes]
+            if (w.L < 0 || w.T < 0 || (w.L + w.T) == 0) {
+                stop("Weights 'w.L' and 'w.T' must be non-negative and sum to a positive value.")
+            }
+            Q <- GetAssayData(sp.obj, slot = "counts", assay = "Spatial") %>% as.data.frame()
+            expr.genes <- Q >= umi.thresh
+            T.j <- colSums(expr.genes)
+            L.j <- colSums(Q)
+            T.max <- max(T.j)
 
-            cnt.sum <- colSums(count.mat)
-            ref.cut <- quantile(cnt.sum, quantile.cut)
-            ref.df <- rowMeans(count.mat[, which(cnt.sum >= ref.cut), drop = FALSE])
-            pred.cnt <- apply(count.mat, 2, function(gg) ceiling(coef(MASS::rlm(gg ~ ref.df - 1), maxit = 100) * max.cells))
-            pred.cnt[pred.cnt <= 0] <- 1
-            pred.cnt[pred.cnt > max.cells] <- max.cells
+            # Compute composite score S_j
+            L.max <- max(L.j)
+            S_j <- w.L * (L.j / L.max) + w.T * (T.j / T.max)
+
+            # Identify reference spot (j_ref) with highest composite score
+            j_ref <- which.max(S_j)
+            L.j_ref <- L.j[j_ref]
+            T.j_ref <- T.j[j_ref]
+
+            m <- L.j_ref / max.cells
+            t <- T.j_ref / max.cells
+
+            C.j <- numeric(length(T.j))
+            C.j_lib <- numeric(length(T.j))
+            for (j in seq_along(T.j)) {
+                if (T.j[j] == 0) {
+                    C.j[j] <- 1 # Avoid log(0); assume 1 cell for empty spots
+                } else {
+                    C.j[j] <- log(1 - T.j[j] / T.max) / log(1 - t / T.max)
+                }
+                C.j_lib[j] <- L.j[j] / m # Library size-based estimate
+            }
+            pred.cnt <- 2 / (1 / pmax(C.j, 1) + 1 / pmax(C.j_lib, 1))
+            pred.cnt <- pmax(1, pmin(max.cells, round(pred.cnt)))
+            names(pred.cnt) <- colnames(Q)
         }
     }
     return(pred.cnt)

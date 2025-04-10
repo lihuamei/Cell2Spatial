@@ -99,7 +99,7 @@ runCell2Spatial <- function(sp.obj,
         Idents(sp.obj) <- sp.obj@meta.data[, spot.clst.column]
         sp.obj$seurat_clusters <- Idents(sp.obj)
     }
-    num.cells <- estCellPerSpots(sp.obj, max.cells.in.spot, fix.cells.in.spot)
+    num.cells <- inferCellNumbers(sp.obj, max.cells.in.spot, fix.cells.in.spot)
 
     println("Weighting the distance between SC and ST data...", verbose = verbose)
     lamba <- median(num.cells[keep.spots])
