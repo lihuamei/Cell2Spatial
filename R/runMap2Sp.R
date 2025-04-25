@@ -122,12 +122,13 @@ runCell2Spatial <- function(sp.obj,
     println("Similarity estimation for single-cells and spots", verbose = verbose)
     feature.based <- ifelse(length(levels(sc.obj)) == 1, "gene.based", match.arg(feature.based))
     if (feature.based == "gene.based") {
+        uniq.markers <- intersect(unique(unlist(sc.markers)), rownames(sc.obj))
         sp.score <- GetAssayData(sp.obj) %>%
-            .[unique(unlist(sc.markers)), ] %>%
+            .[uniq.markers, ] %>%
             as.matrix() %>%
             t()
         sc.score <- GetAssayData(sc.obj) %>%
-            .[unique(unlist(sc.markers)), ] %>%
+            .[uniq.markers, ] %>%
             as.matrix() %>%
             t()
     } else {
