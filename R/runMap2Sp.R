@@ -80,7 +80,7 @@ runCell2Spatial <- function(sp.obj,
 
     println("Detecting hotspot regions for ST data", verbose = verbose)
     sp.score <- getGsetScore(sp.obj, sc.markers, assay = "SCT", signature.scoring.method)
-    hot.spts <- switch(match.arg(hotspot.detection.method),
+    hot.spts.lst <- switch(match.arg(hotspot.detection.method),
         getis.ord = {
             hot.spts.lst <- dectHotSpotsByGetisOrdGi(sp.obj, sp.score, knn, hotspot.detection.threshold)
         },
