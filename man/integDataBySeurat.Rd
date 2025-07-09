@@ -4,7 +4,14 @@
 \alias{integDataBySeurat}
 \title{integDataBySeurat}
 \usage{
-integDataBySeurat(sp.obj, sc.obj, npcs = 30, n.features = 3000, verbose = TRUE)
+integDataBySeurat(
+  sp.obj,
+  sc.obj,
+  npcs = 30,
+  n.features = 3000,
+  dist.based = c("UMAP", "TSNE"),
+  verbose = TRUE
+)
 }
 \arguments{
 \item{sp.obj}{Seurat object of spatial transcriptome (ST) data.}

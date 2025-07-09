@@ -10,7 +10,8 @@ weightDist(
   lamba,
   quantile.cut,
   mc.cores = 4,
-  use.entire = TRUE
+  use.entire = TRUE,
+  dist.based = c("UMAP", "TSNE")
 )
 }
 \arguments{

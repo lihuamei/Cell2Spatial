@@ -7,7 +7,6 @@
 preprocessSeqData(
   sp.obj,
   sc.obj,
-  sample.size,
   cell.type.column,
   min.cells.of.subset = 5,
   verbose = TRUE
@@ -17,8 +16,6 @@ preprocessSeqData(
 \item{sp.obj}{Seurat object of ST data.}
 
 \item{sc.obj}{Seurat object of SC data.}
-
-\item{sample.size}{Proportion for downsampling single cells of each cell type.}
 
 \item{cell.type.column}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
 

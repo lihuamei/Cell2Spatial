@@ -103,16 +103,52 @@ findScMarkers <- function(sc.obj, group.size, select.markers = c("shannon", "wil
             group.ctype <- apply(X, 1, which.max) %>%
                 colnames(X)[.] %>%
                 as.vector()
-            score.df <- cbind.data.frame(cluster = group.ctype, Score = shannon.dist * w.genes, gene = rownames(X))
-            sc.markers <- score.df %>%
-                arrange(desc(Score)) %>%
-                arrange(cluster) %>%
-                .[!grepl("^MT-|^RP[L|S]", .$gene), ] %>%
-                group_by(cluster) %>%
-                top_n(wt = Score, n = group.size) %>%
-                {
-                    split(.$gene, .$cluster)
-                } %>%
+
+            cv.filter <- sapply(levels(sc.obj), function(ct) {
+                ct.cells <- which(Idents(sc.obj) == ct)
+                ct.expr <- GetAssayData(sc.obj, assay = "SCT", slot = "data")[, ct.cells]
+                gene.means <- MatrixGenerics::rowMeans(ct.expr)
+                gene.sds <- MatrixGenerics::rowSds(ct.expr)
+                cv <- ifelse(gene.means > 0, gene.sds / gene.means, 0)
+                all.genes <- rownames(X)
+                cv.all <- numeric(length(all.genes))
+                names(cv.all) <- all.genes
+                cv.all[names(cv)] <- cv
+                cv.all
+            }, simplify = TRUE)
+
+            score.df <- data.frame(
+                cluster = group.ctype,
+                Score = shannon.dist * w.genes,
+                gene = rownames(X),
+                stringsAsFactors = FALSE
+            )
+            cv.bool.df <- lapply(levels(sc.obj), function(ct) {
+                tmp.vec <- rep(FALSE, nrow(score.df))
+                threash.cut <- mean(cv.filter[, ct]) + 3 * sd(cv.filter[, ct])
+                genes.rm <- which(cv.filter[score.df$gene, ct] < threash.cut)
+                tmp.vec[genes.rm] <- TRUE
+                return(tmp.vec)
+            }) %>%
+                do.call(cbind.data.frame, .) %>%
+                `rownames<-`(score.df$gene) %>%
+                `colnames<-`(levels(sc.obj))
+
+            keep.ct <- intersect(levels(sc.obj), unique(group.ctype))
+            sc.markers <- lapply(keep.ct, function(ct) {
+                score.df.sub <- subset(score.df, cluster == ct)
+                score.df.sub <- score.df.sub[cv.bool.df[score.df.sub$gene, ct], ]
+                if (length(score.df.sub) == 0) {
+                    return(NULL)
+                }
+                score.df.sub %>%
+                    arrange(desc(Score)) %>%
+                    .[!grepl("^MT-|^RP[L|S]", .$gene), ] %>%
+                    {
+                        .$gene[1:min(nrow(.), group.size)]
+                    }
+            }) %>%
+                `names<-`(keep.ct) %>%
                 .[lapply(., length) > 0]
         }
     )

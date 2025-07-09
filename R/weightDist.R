@@ -47,13 +47,12 @@ psedoSpotExprUseSC <- function(sc.obj, sp.obj, pseu.cnt = 200, lamba = 5, mc.cor
 #' @return Integrated Seurat object.
 #' @export integDataBySeurat
 
-integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, verbose = TRUE) {
+integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, dist.based = c("UMAP", "TSNE"), verbose = TRUE) {
     sc.obj$Batches <- "SC"
     sp.obj$Batches <- "ST"
     DefaultAssay(sc.obj) <- "RNA"
     DefaultAssay(sp.obj) <- "Spatial"
 
-    options(warn = -1)
     sc.obj <- sc.obj %>%
         NormalizeData(verbose = verbose) %>%
         FindVariableFeatures(verbose = verbose)
@@ -71,7 +70,14 @@ integDataBySeurat <- function(sp.obj, sc.obj, npcs = 30, n.features = 3000, verb
     obj <- IntegrateData(anchorset = anchors, normalization.method = "LogNormalize", k.weight = 30, verbose = verbose)
     obj <- ScaleData(obj, verbose = verbose)
     obj <- RunPCA(obj, verbose = verbose)
-    obj <- RunUMAP(obj, reduction = "pca", dims = 1:npcs, reduction.key = "UMAP_", verbose = verbose)
+    obj <- switch(match.arg(dist.based),
+        UMAP = {
+            obj <- RunUMAP(obj, reduction = "pca", dims = 1:npcs, reduction.key = "UMAP_", verbose = verbose)
+        },
+        TSNE = {
+            obj <- RunTSNE(obj, reduction = "pca", dims = 1:npcs, reduction.key = "UMAP_", verbose = verbose)
+        }
+    )
     return(obj)
 }
 
@@ -159,6 +165,7 @@ adjcentScOfSPGlobal <- function(obj, quantile.cut = 1) {
         as.data.frame() %>%
         `rownames<-`(rownames(umap.sp))
     adj.df <- as.matrix(adj.df)
+    adj.df[adj.df < 0] <- 0
     return(adj.df)
 }
 
@@ -172,14 +179,14 @@ adjcentScOfSPGlobal <- function(obj, quantile.cut = 1) {
 #' @param mc.cores Number of cores for parallel running. Default: 4
 #' @return A matrix of weighted distance matrix. Rows represent spot clusters and columns are cell types.
 
-weightDist <- function(sc.obj, sp.obj, lamba, quantile.cut, mc.cores = 4, use.entire = TRUE) {
+weightDist <- function(sc.obj, sp.obj, lamba, quantile.cut, mc.cores = 4, use.entire = TRUE, dist.based = c("UMAP", "TSNE")) {
     if (use.entire || length(levels(sc.obj)) == 1) {
-        adj.df <- integDataBySeurat(sp.obj, sc.obj, verbose = FALSE) %>%
+        adj.df <- integDataBySeurat(sp.obj, sc.obj, dist.based = dist.based, verbose = FALSE) %>%
             adjcentScOfSPGlobal(., quantile.cut)
     } else {
         sc.syn <- psedoSpotExprUseSC(sc.obj, sp.obj, pseu.cnt = 200, lamba = lamba, mc.cores = mc.cores)
         sp.syn <- downSamplSeurat(sp.obj, cnt = 200)
-        adj.df <- integDataBySeurat(sp.syn, sc.syn, verbose = FALSE) %>%
+        adj.df <- integDataBySeurat(sp.syn, sc.syn, dist.based = dist.based, verbose = FALSE) %>%
             adjcentScOfSP(.) %>%
             as.data.frame(.) %>%
             mutate(CLUSTER = Idents(sp.obj)[rownames(.)]) %>%

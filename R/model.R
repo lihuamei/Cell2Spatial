@@ -96,6 +96,7 @@ ctypesOfClusters <- function(sp.obj, hot.pvals, p.cut = 0.05) {
         as.data.frame() %>%
         `rownames<-`(levels(sp.obj)) %>%
         `colnames<-`(colnames(hot.spts.tp))
+    w.mat <- ifelse(w.mat < 0.01, 0, 1)
     return(w.mat)
 }
 

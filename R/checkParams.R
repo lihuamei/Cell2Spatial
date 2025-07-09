@@ -9,24 +9,20 @@ checkParams.runMap2SP <- function(argg) {
         is(argg[["sp.obj"]], "Seurat"),
         is(argg[["sc.obj"]], "Seurat"),
         is.character(argg[["cell.type.column"]]),
-        if (!is.null(argg[["spot.clst.column"]])) is.character(argg[["spot.clst.column"]]) else TRUE,
-        if (!is.null(argg[["sample.size"]])) is.numeric(argg[["sample.size"]]) && argg[["sample.size"]] > 0 else TRUE,
         if (!is.null(argg[["sc.markers"]])) is(argg[["sc.markers"]], "list") else TRUE,
         is.character(argg[["marker.selection.method"]]),
         is.numeric(argg[["group.size"]]) && argg[["group.size"]] >= 5,
         is.numeric(argg[["resolution"]]) && argg[["resolution"]] > 0,
-        is.numeric(argg[["knn"]]) && argg[["knn"]] >= 1,
         is.logical(argg[["partition"]]),
         if (!is.null(argg[["max.cells.in.spot"]])) is.numeric(argg[["max.cells.in.spot"]]) && argg[["max.cells.in.spot"]] > 0 else TRUE,
         if (!is.null(argg[["fix.cells.in.spot"]])) is.numeric(argg[["fix.cells.in.spot"]]) && argg[["fix.cells.in.spot"]] > 0 else TRUE,
         is.character(argg[["signature.scoring.method"]]),
-        is.character(argg[["hotspot.detection.method"]]),
         is.numeric(argg[["hotspot.detection.threshold"]]) && argg[["hotspot.detection.threshold"]] <= 1 && argg[["hotspot.detection.threshold"]] > 0,
         is.logical(argg[["integ.entire.dataset"]]),
         is.character(argg[["feature.based"]]),
         is.character(argg[["dist.method"]]),
-        is.numeric(argg[["quantile.cut"]]) && argg[["quantile.cut"]] <= 1 && argg[["quantile.cut"]] >= 0.25,
-        is.logical(argg[["hclust"]]),
+        is.character(argg[["dist.based"]]),
+        is.numeric(argg[["dist.quantile.cut"]]) && argg[["dist.quantile.cut"]] <= 1 && argg[["dist.quantile.cut"]] > 0,
         is.character(argg[["output.type"]]),
         is.numeric(argg[["n.workers"]]) && argg[["n.workers"]] >= 1,
         is.logical(argg[["verbose"]])
@@ -39,20 +35,12 @@ checkParams.runMap2SP <- function(argg) {
 #' @description The preprocessing of single-cell (SC) data includes several steps such as down-sampling, filtering out low-quality cell types, and normalization.
 #' @param sp.obj Seurat object of ST data.
 #' @param sc.obj Seurat object of SC data.
-#' @param sample.size Proportion for downsampling single cells of each cell type.
 #' @param cell.type.column Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.
 #' @param min.cells.of.subset Include cells detected in at least one cell type in the SC data. Default: 5.
 #' @param verbose Boolean indicating whether to show running messages. Default: TRUE.
 #' @return A list of Seurat objects of preprocessed data.
 
-preprocessSeqData <- function(sp.obj, sc.obj, sample.size, cell.type.column, min.cells.of.subset = 5, verbose = TRUE) {
-    if (!is.null(sample.size)) {
-        if (sample.size > 1) {
-            sc.obj <- downSamplSeurat(sc.obj, cnt = sample.size)
-        } else {
-            sc.obj <- downSamplSeurat(sc.obj, percent = sample.size)
-        }
-    }
+preprocessSeqData <- function(sp.obj, sc.obj, cell.type.column, min.cells.of.subset = 5, verbose = TRUE) {
     if (cell.type.column != "idents") Idents(sc.obj) <- sc.obj@meta.data[, cell.type.column]
     levels(sc.obj) <- intersect(levels(sc.obj), unique(Idents(sc.obj) %>% as.vector()))
     cell.cnts <- table(Idents(sc.obj))
