@@ -186,7 +186,7 @@ weightDist <- function(sc.obj, sp.obj, lamba, quantile.cut, mc.cores = 4, use.en
             adjcentScOfSPGlobal(., quantile.cut)
     } else {
         sc.syn <- psedoSpotExprUseSC(sc.obj, sp.obj, pseu.cnt = 200, lamba = lamba, mc.cores = mc.cores)
-      #  sp.syn <- downSamplSeurat(sp.obj, cnt = 200)
+        sp.syn <- downSamplSeurat(sp.obj, cnt = 200)
         adj.df <- integDataBySeurat(sp.syn, sc.syn, dist.based = dist.based, verbose = FALSE) %>%
             adjcentScOfSP(.) %>%
             as.data.frame(.) %>%
