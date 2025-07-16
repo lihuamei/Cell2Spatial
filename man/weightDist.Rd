@@ -23,7 +23,9 @@ weightDist(
 
 \item{quantile.cut}{Numeric value specifying the quantile threshold for distance scaling. Default is 1, which considers the maximum distance for normalization.}
 
-\item{mc.cores}{Number of cores for parallel running. Default: 4}
+\item{mc.cores}{Number of cores for parallel running. Default: 4.}
+
+\item{dist.based}{Dimensionality reduction basis used for distance weighting.}
 }
 \value{
 A matrix of weighted distance matrix. Rows represent spot clusters and columns are cell types.

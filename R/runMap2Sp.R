@@ -15,7 +15,7 @@
 #' @param hotspot.detection.threshold P-value threshold for determining hot spots of cell types, range from 0 to 1. Default: 1.
 #' @param integ.entire.dataset Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: FALSE.
 #' @param feature.based Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: 'gene.based'.
-#‘ @param Dimensionality reduction basis used for distance weighting, UMAP or TSNE. Default: UMAP.
+# ‘ @param Dimensionality reduction basis used for distance weighting, UMAP or TSNE. Default: UMAP.
 #' @param dist.method Measure the distance between single cells and spots, using maximum likelihood model (mle) or correlation (cor). Default: mle.
 #' @param dist.quantile.cut Numeric value specifying the quantile threshold for UMAP distance scaling, ranging from 0 to 1. Default is 1, which considers the maximum distance for normalization. This parameter is only effective when integ.entire.dataset = TRUE.
 #' @param output.type Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.
