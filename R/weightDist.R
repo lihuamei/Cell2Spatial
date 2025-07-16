@@ -176,7 +176,8 @@ adjcentScOfSPGlobal <- function(obj, quantile.cut = 1) {
 #' @param sp.obj Seurat object of ST data.
 #' @param lamba Median of cell counts for spots.
 #' @param quantile.cut Numeric value specifying the quantile threshold for distance scaling. Default is 1, which considers the maximum distance for normalization.
-#' @param mc.cores Number of cores for parallel running. Default: 4
+#' @param mc.cores Number of cores for parallel running. Default: 4.
+#' @param dist.based Dimensionality reduction basis used for distance weighting.
 #' @return A matrix of weighted distance matrix. Rows represent spot clusters and columns are cell types.
 
 weightDist <- function(sc.obj, sp.obj, lamba, quantile.cut, mc.cores = 4, use.entire = TRUE, dist.based = c("UMAP", "TSNE")) {
@@ -185,7 +186,7 @@ weightDist <- function(sc.obj, sp.obj, lamba, quantile.cut, mc.cores = 4, use.en
             adjcentScOfSPGlobal(., quantile.cut)
     } else {
         sc.syn <- psedoSpotExprUseSC(sc.obj, sp.obj, pseu.cnt = 200, lamba = lamba, mc.cores = mc.cores)
-        sp.syn <- downSamplSeurat(sp.obj, cnt = 200)
+      #  sp.syn <- downSamplSeurat(sp.obj, cnt = 200)
         adj.df <- integDataBySeurat(sp.syn, sc.syn, dist.based = dist.based, verbose = FALSE) %>%
             adjcentScOfSP(.) %>%
             as.data.frame(.) %>%
