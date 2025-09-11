@@ -13,7 +13,7 @@ linearSumAssignment(
   hot.spts,
   st.prop,
   partition,
-  hclust = TRUE
+  assay
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ linearSumAssignment(
 
 \item{partition}{Logical indicating whether to split into sub-modules mapped to spatial positions.}
 
-\item{hclust}{Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.}
+\item{assay}{Assay to use for SC data. Default: "SCT".}
 }
 \value{
 A list of assigned cells corresponding to spots.

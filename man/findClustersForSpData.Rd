@@ -4,18 +4,34 @@
 \alias{findClustersForSpData}
 \title{findClustersForSpData}
 \usage{
-findClustersForSpData(obj.seu, npcs = 30, res = 0.8, verbose = TRUE)
+findClustersForSpData(
+  obj.seu,
+  npcs = 30,
+  res.start = 0.1,
+  res.step = 0.05,
+  assay = "SCT",
+  cap = 20000,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{obj.seu}{Seurat object of ST data.}
+\item{obj.seu}{A Seurat object containing the spatial transcriptomics (ST) data.}
 
-\item{npcs}{Number of PCs for clustering. Default: 50.}
+\item{npcs}{Number of principal components (PCs) to use for clustering. Default: 30.}
 
-\item{res}{Resolution parameter for finding clusters. Default: 0.8.}
+\item{res.start}{Initial resolution parameter for finding clusters. Higher values result in more clusters. Default: 0.1.}
+
+\item{res.step}{Step size by which the resolution parameter is incremented in each iteration. Default: 0.05.}
+
+\item{assay}{The assay to use for the analysis. Default: "SCT" (Seurat’s SCTransform).}
+
+\item{cap}{The maximum allowed number of cells in a cluster. The clustering resolution will adjust to ensure no cluster exceeds this cap. Default: 20000.}
+
+\item{verbose}{Logical, whether to print progress messages during the process. Default: TRUE.}
 }
 \value{
-Seurat object after clustering.
+A Seurat object after clustering and UMAP computation.
 }
 \description{
-Find clusters for single-cell data based on Seurat object.
+Perform clustering on spatial transcriptomics data based on a Seurat object.
 }

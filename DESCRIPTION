@@ -28,6 +28,7 @@ Imports:
     stringr,
     spdep,
     dbscan,
-    UCell
+    UCell,
+    matrixStats
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

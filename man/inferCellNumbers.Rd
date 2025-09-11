@@ -7,24 +7,30 @@
 inferCellNumbers(
   sp.obj,
   max.cells = 10,
-  umi.thresh = 2,
+  umi.thresh = 1,
   w.L = 0.5,
   w.T = 0.5,
-  fix.cells.in.spot = NULL
+  fix.cells.in.spot = FALSE,
+  q.ref = 0.9,
+  winsor.p = 0.01
 )
 }
 \arguments{
 \item{sp.obj}{A Seurat object containing spatial transcriptomics data (Q matrix in the "counts" slot of the "Spatial" assay).}
 
-\item{max.cells}{Maximum number of cells assumed in any spot (default = 10).}
+\item{max.cells}{Maximum number of cells assumed in any spot. Default: 10.}
 
-\item{umi.thresh}{Minimum UMI count to consider a gene as expressed (default = 2).}
+\item{umi.thresh}{Minimum UMI count to consider a gene as expressed. Default: 1.}
 
-\item{w.L}{Weight for library size in the composite score (default = 0.5).}
+\item{w.L}{Weight for library size in the composite score. Default: 0.5.}
 
-\item{w.T}{Weight for gene count in the composite score (default = 0.5).}
+\item{w.T}{Weight for gene count in the composite score: Default: 0.5.}
 
-\item{fix.cells.in.spot}{Fixed number of cells assigned to each spot. Default: NULL.}
+\item{fix.cells.in.spot}{Fixed number of cells assigned to each spot or not. Default: FALSE.}
+
+\item{q.ref}{Quantile threshold used to select spots for reference. Default: 0.90.}
+
+\item{winsor.p}{Quantile for winsorization. Default: 0.01.}
 }
 \value{
 A named vector of estimated cell numbers per spot.

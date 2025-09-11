@@ -15,7 +15,9 @@ createSpatialObject(
 \arguments{
 \item{counts}{UMI count matrix, rows are genes and columns are barcodes.}
 
-\item{coord.df}{A data.frame of coordinates for spatial barcodes. The coordinates are placed in the first two columns.}
+\item{coord.df}{A data.frame of coordinates for spatial barcodes. The coordinates are placed in the first two columns. Default: c("x", "y").}
+
+\item{meta.data}{A data frame containing metadata to be added to the Seurat object. Default: NULL.}
 
 \item{class}{Class name of the Spatial image slot. Default: SlideSeq.}
 }

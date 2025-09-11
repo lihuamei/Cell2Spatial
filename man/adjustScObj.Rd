@@ -4,14 +4,14 @@
 \alias{adjustScObj}
 \title{adjustScObj}
 \usage{
-adjustScObj(sc.obj, st.prop, num.cells)
+adjustScObj(sc.obj, st.prop.cnts, assay = "SCT")
 }
 \arguments{
 \item{sc.obj}{Seurat object of single-cell (SC) data.}
 
-\item{st.prop}{A data.frame containing proportions for ST data.}
+\item{assay}{Assay type to use for SC data normalization. Default: SCT.}
 
-\item{num.cells}{A vector of cell counts for ST spots.}
+\item{st.prop}{A data.frame containing cell counts for ST data.}
 }
 \value{
 Adjusted Seurat object of SC data.

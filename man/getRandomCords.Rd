@@ -4,7 +4,7 @@
 \alias{getRandomCords}
 \title{getRandomCords}
 \usage{
-getRandomCords(sp.coord, num.cells, seed = 123456, n.workers = 4)
+getRandomCords(sp.coord, num.cells, seed = 123456)
 }
 \arguments{
 \item{sp.coord}{Coordinates of ST image data.}
@@ -12,8 +12,6 @@ getRandomCords(sp.coord, num.cells, seed = 123456, n.workers = 4)
 \item{num.cells}{A list of number of cells for mapping to spot.}
 
 \item{seed}{Set seed for generating radom coordinates. Default: 123456.}
-
-\item{n.workers}{Number of cores for parallel processing. Default: 4.}
 }
 \value{
 A data.frame of generated spatial coordinates.

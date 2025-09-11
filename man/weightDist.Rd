@@ -8,9 +8,9 @@ weightDist(
   sc.obj,
   sp.obj,
   lamba,
-  quantile.cut,
-  mc.cores = 4,
-  use.entire = TRUE,
+  assay,
+  reduction,
+  cells.thresh = 50000,
   dist.based = c("UMAP", "TSNE")
 )
 }
@@ -21,11 +21,13 @@ weightDist(
 
 \item{lamba}{Median of cell counts for spots.}
 
-\item{quantile.cut}{Numeric value specifying the quantile threshold for distance scaling. Default is 1, which considers the maximum distance for normalization.}
+\item{assay}{The assay to use for the normalize analysis.}
 
-\item{mc.cores}{Number of cores for parallel running. Default: 4.}
+\item{reduction}{Dimensionality reduction technique to align spatial and single-cell data.}
 
-\item{dist.based}{Dimensionality reduction basis used for distance weighting.}
+\item{cells.thresh}{Threshold for cell counts in the SC object. When the cell count exceeds this threshold, the function switches to a faster mode. Default: 50000.}
+
+\item{dist.based}{Dimensionality reduction basis used for distance weighting. Default: UMAP.}
 }
 \value{
 A matrix of weighted distance matrix. Rows represent spot clusters and columns are cell types.

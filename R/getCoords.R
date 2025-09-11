@@ -1,6 +1,7 @@
 #' @title calcSpotsDist
 #'
 #' @description Identified significant spots located in medulla areas and calculate the distances between spots.
+#'
 #' @param sp.obj Spatial seurat object data.
 #' @param knn Number of nearest cells used for estimating cellular proportions. Default: 5.
 #' @return A list distance relationship.
@@ -18,16 +19,14 @@ calcSpotsDist <- function(sp.obj, knn = 5) {
 #' @title getRandomCords
 #'
 #' @description Get random coordinates for mapping single-cells to spatial.
+#'
 #' @param sp.coord Coordinates of ST image data.
 #' @param num.cells A list of number of cells for mapping to spot.
 #' @param seed Set seed for generating radom coordinates. Default: 123456.
-#' @param n.workers Number of cores for parallel processing. Default: 4.
 #' @return A data.frame of generated spatial coordinates.
-#' @export getRandomCords
 
-getRandomCords <- function(sp.coord, num.cells, seed = 123456, n.workers = 4) {
+getRandomCords <- function(sp.coord, num.cells, seed = 123456) {
     set.seed(seed)
-    future::plan("multicore", workers = n.workers)
     if (is.numeric(num.cells)) num.cells <- as.list(num.cells) %>% `names<-`(names(num.cells))
     min.dist <- dbscan::kNN(sp.coord[, c(1, 2)], k = 2) %>%
         {
@@ -65,22 +64,19 @@ getRandomCords <- function(sp.coord, num.cells, seed = 123456, n.workers = 4) {
 #' @title assignSCcords
 #'
 #' @description Assign single-cells to spatial coordinates.
+#'
 #' @param sp.obj Seurat object of spatial transcriptome (ST) data.
 #' @param sc.obj Seurat object of single-cell data.
 #' @param out.sc A list of ordered single-cells correspond to spots.
 #' @param num.cells A list of number of cells for mapping to spot.
-#' @param output.type Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.
-#' @param n.workers  Number of cores for parallel processing. Default: 4.
-#' @return Seurat or SingleCellExperiment object for mapped results.
-#' @export assignSCcords
+#' @return Seurat object for mapped results.
 
-assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, output.format = "Seurat") {
+assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells) {
     sp.cords <- GetTissueCoordinates(sp.obj) %>% .[intersect(rownames(.), names(out.sc)), 1:2]
     sp.obj <- sp.obj[, rownames(sp.cords)]
     out.sc <- out.sc[rownames(sp.cords)]
-    cord.new <- getRandomCords(sp.cords, num.cells = num.cells, n.workers = n.workers)
+    cord.new <- getRandomCords(sp.cords, num.cells = num.cells)
 
-    future::plan("multicore", workers = n.workers)
     map.cords <- future.apply::future_lapply(1:length(out.sc), function(ispot) {
         ispot.cords <- sp.cords[ispot, ]
         sub.cords <- cord.new[cord.new$centerSPOT == paste0(ispot.cords[1], "x", ispot.cords[2]), ]
@@ -100,24 +96,16 @@ assignSCcords <- function(sp.obj, sc.obj, out.sc, num.cells, n.workers = 4, outp
     count.CT <- as(count.sc[, map.cords$Cell], "sparseMatrix")
     colnames(count.CT) <- rownames(map.cords)
 
-    if (output.format == "Seurat") {
-        coord.df <- data.frame(imagerow = map.cords$x, imagecol = map.cords$y) %>% `rownames<-`(rownames(map.cords))
-        if (class(sp.obj@images[[1]])[[1]] != "SlideSeq") {
-            sce <- CreateSeuratObject(count = count.CT, meta.data = map.cords, project = "Cell2Spatial", assay = "Spatial")
-            sce@images <- sp.obj@images
-            sce@images[[1]]@assay <- DefaultAssay(sce)
-            sce@images[[1]]@coordinates <- coord.df
-            sce@images[[1]]@scale.factors <- sp.obj@images[[1]]@scale.factors
-            sce@images[[1]]@coordinates <- sce@images[[1]]@coordinates / sce@images[[1]]@scale.factors$lowres
-        } else {
-            sce <- createSpatialObject(count = count.CT, coord.df = coord.df, meta.data = map.cords, coord.label = c("imagerow", "imagecol"))
-        }
+    coord.df <- data.frame(imagerow = map.cords$x, imagecol = map.cords$y) %>% `rownames<-`(rownames(map.cords))
+    if (class(sp.obj@images[[1]])[[1]] != "SlideSeq") {
+        sce <- CreateSeuratObject(count = count.CT, meta.data = map.cords, project = "Cell2Spatial", assay = "Spatial")
+        sce@images <- sp.obj@images
+        sce@images[[1]]@assay <- DefaultAssay(sce)
+        sce@images[[1]]@coordinates <- coord.df
+        sce@images[[1]]@scale.factors <- sp.obj@images[[1]]@scale.factors
+        sce@images[[1]]@coordinates <- sce@images[[1]]@coordinates / sce@images[[1]]@scale.factors$lowres
     } else {
-        sce <- SingleCellExperiment::SingleCellExperiment(
-            list(counts = count.CT),
-            colData = as.data.frame(map.cords),
-            rowData = as.data.frame(rownames(count.CT))
-        )
+        sce <- createSpatialObject(count = count.CT, coord.df = coord.df, meta.data = map.cords, coord.label = c("imagerow", "imagecol"))
     }
     return(sce)
 }

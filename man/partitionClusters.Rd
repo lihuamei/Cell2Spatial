@@ -4,7 +4,7 @@
 \alias{partitionClusters}
 \title{partitionClusters}
 \usage{
-partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclust = TRUE)
+partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, st.prop, assay = "SCT")
 }
 \arguments{
 \item{sp.obj}{Seurat object containing ST data.}
@@ -17,7 +17,7 @@ partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, st.prop, hclust = TRUE)
 
 \item{st.prop}{Estimated proportions for ST spots.}
 
-\item{hclust}{Logical. If TRUE, hierarchical clustering is applied to group ST clusters. Default: TRUE.}
+\item{assay}{Assay to use for SC data. Default: "SCT".}
 }
 \value{
 A list of single cells partitioned into sub-clusters.

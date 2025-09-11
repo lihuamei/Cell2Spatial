@@ -7,6 +7,8 @@
 integDataBySeurat(
   sp.obj,
   sc.obj,
+  assay,
+  reduction,
   npcs = 30,
   n.features = 3000,
   dist.based = c("UMAP", "TSNE"),
@@ -18,9 +20,15 @@ integDataBySeurat(
 
 \item{sc.obj}{Seurat object of single-cell data.}
 
+\item{assay}{Assay type to use for SC data normalization.}
+
+\item{reduction}{Dimensionality reduction technique to align spatial and single-cell data.}
+
 \item{npcs}{Number of PCs for running UMAP. Default: 30.}
 
 \item{n.features}{Number of features set for SelectIntegrationFeatures. Default: 3000.}
+
+\item{dist.based}{Dimensionality reduction basis used for distance weighting, UMAP or TSNE. Default: UMAP.}
 
 \item{verbose}{Show running messages or not. Default: TRUE.}
 }

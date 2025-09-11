@@ -4,14 +4,7 @@
 \alias{assignSCcords}
 \title{assignSCcords}
 \usage{
-assignSCcords(
-  sp.obj,
-  sc.obj,
-  out.sc,
-  num.cells,
-  n.workers = 4,
-  output.format = "Seurat"
-)
+assignSCcords(sp.obj, sc.obj, out.sc, num.cells)
 }
 \arguments{
 \item{sp.obj}{Seurat object of spatial transcriptome (ST) data.}
@@ -21,13 +14,9 @@ assignSCcords(
 \item{out.sc}{A list of ordered single-cells correspond to spots.}
 
 \item{num.cells}{A list of number of cells for mapping to spot.}
-
-\item{n.workers}{Number of cores for parallel processing. Default: 4.}
-
-\item{output.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
 }
 \value{
-Seurat or SingleCellExperiment object for mapped results.
+Seurat object for mapped results.
 }
 \description{
 Assign single-cells to spatial coordinates.

@@ -7,22 +7,21 @@
 runCell2Spatial(
   sp.obj,
   sc.obj,
-  cell.type.column = "idents",
-  sc.markers = NULL,
-  marker.selection.method = c("shannon", "wilcox"),
-  group.size = 100,
-  resolution = 0.8,
-  partition = FALSE,
+  cell.type.column = NULL,
+  cell.type.markers = NULL,
+  normalize.method = c("SCTransform", "LogNormalize"),
+  group.size = 30,
+  knn.spots = 5,
   max.cells.in.spot = 10,
-  fix.cells.in.spot = NULL,
+  fix.cells.in.spot = FALSE,
   signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
   hotspot.detection.threshold = 1,
-  integ.entire.dataset = FALSE,
   feature.based = c("gene.based", "celltype.based"),
-  dist.method = c("mle", "cor"),
   dist.based = c("UMAP", "TSNE"),
-  dist.quantile.cut = 1,
-  output.type = c("Seurat", "SingleCellExperiment"),
+  spatial.weight = FALSE,
+  reduction = c("cca", "rpca"),
+  platform.res = c("Low", "High"),
+  partition = FALSE,
   n.workers = 4,
   verbose = TRUE
 )
@@ -32,42 +31,42 @@ runCell2Spatial(
 
 \item{sc.obj}{Seurat object of single-cell (SC) data.}
 
-\item{cell.type.column}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: idents.}
+\item{cell.type.column}{Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: NULL.}
 
-\item{sc.markers}{When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.}
+\item{cell.type.markers}{When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.}
 
-\item{marker.selection.method}{Method for selecting cell-type specific markers when \code{sc.markers = NULL}: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.}
+\item{normalize.method}{Normalization method for scRNA-seq data. Default: SCTransform.}
 
 \item{group.size}{Specify the marker size for each subset derived from single-cell data. Default: 30.}
 
-\item{resolution}{Resolution for clustering ST spots. Default: 0.8.}
-
-\item{partition}{Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: FALSE.}
+\item{knn.spots}{Number of nearest neighbors to consider for spot-based deconvolution analysis. When set to 0, neighbors are not used. Default: 5.}
 
 \item{max.cells.in.spot}{Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set \code{max.cells.in.spot} to 1.}
 
-\item{fix.cells.in.spot}{Fixed number of cells assigned to a spot. Default: NULL.}
+\item{fix.cells.in.spot}{Fixed number of cells assigned to a spot or not. Default: FALSE.}
 
 \item{signature.scoring.method}{Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.}
 
 \item{hotspot.detection.threshold}{P-value threshold for determining hot spots of cell types, range from 0 to 1. Default: 1.}
 
-\item{integ.entire.dataset}{Estimate the distance weight between SC and ST using entire or pseudo and downsampled data. Default: FALSE.}
-
 \item{feature.based}{Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: 'gene.based'.}
 
-\item{dist.method}{Measure the distance between single cells and spots, using maximum likelihood model (mle) or correlation (cor). Default: mle.}
+\item{dist.based}{Dimensionality reduction basis used for distance weighting, UMAP or TSNE. Default: UMAP.}
 
-\item{dist.quantile.cut}{Numeric value specifying the quantile threshold for UMAP distance scaling, ranging from 0 to 1. Default is 1, which considers the maximum distance for normalization. This parameter is only effective when integ.entire.dataset = TRUE.}
+\item{spatial.weight}{Whether to apply spatial weights to the analysis. Default: FALSE.}
 
-\item{output.type}{Assigned results can be of the object type Seurat or SingleCellExperiment. Default: Seurat.}
+\item{reduction}{Dimensionality reduction technique to align spatial and single-cell data. Default: cca.}
+
+\item{platform.res}{Resolution of the spatial platform (Low or High). Default: Low.}
+
+\item{partition}{Split into sub-modules when mapping SC to ST spots, with 'partion' set to TRUE. Default: FALSE.}
 
 \item{n.workers}{Number of cores for parallel processing. Default: 4.}
 
 \item{verbose}{Show running messages or not. Default: TRUE.}
 }
 \value{
-Assigned results wrapped as a Seurat or SingleCellExperiment object.
+Assigned results wrapped as a Seurat object.
 }
 \description{
 Accurate mapping of single cells to spatial coordinates.
@@ -75,5 +74,5 @@ Accurate mapping of single cells to spatial coordinates.
 \examples{
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
-sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", res = 0.8, group.size = 100, fix.cells.in.spot = 10)
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", group.size = 30, fix.cells.in.spot = TRUE)
 }
