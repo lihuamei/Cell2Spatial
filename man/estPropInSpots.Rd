@@ -8,6 +8,7 @@ estPropInSpots(
   sp.obj,
   sc.obj,
   sc.markers,
+  num.cells = NULL,
   hot.pvals = NULL,
   weight = TRUE,
   assay = "SCT",

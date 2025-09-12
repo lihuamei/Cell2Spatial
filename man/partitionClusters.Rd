@@ -4,20 +4,30 @@
 \alias{partitionClusters}
 \title{partitionClusters}
 \usage{
-partitionClusters(sp.obj, sc.obj, num.cells, hot.spts, st.prop, assay = "SCT")
+partitionClusters(
+  sp.obj,
+  sc.obj,
+  hot.pvals,
+  st.prop.cnts,
+  assay = "SCT",
+  reduction = "cca",
+  npcs = 30
+)
 }
 \arguments{
 \item{sp.obj}{Seurat object containing ST data.}
 
 \item{sc.obj}{Seurat object containing SC data.}
 
-\item{num.cells}{A vector of cell counts in spots.}
+\item{hot.pvals}{Data frame of hotspot p-values indicating hotspot presence in spots and cell types.}
 
-\item{hot.spts}{Data frame indicating hotspot presence in spots and cell types.}
-
-\item{st.prop}{Estimated proportions for ST spots.}
+\item{st.prop.cnts}{Estimated spot-level counts matrix (rows=spots, cols=cell types).}
 
 \item{assay}{Assay to use for SC data. Default: "SCT".}
+
+\item{reduction}{Dimensionality reduction technique to align spatial and single-cell data. Default: cca.}
+
+\item{npcs}{Number of PCA components to use. Default: 30.}
 }
 \value{
 A list of single cells partitioned into sub-clusters.

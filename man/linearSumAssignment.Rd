@@ -9,11 +9,12 @@ linearSumAssignment(
   sc.obj,
   out.sim,
   adj.w,
-  num.cells,
-  hot.spts,
-  st.prop,
+  hot.pvals,
+  st.prop.cnts,
   partition,
-  assay
+  assay,
+  reduction,
+  thresh.cells = 30000
 )
 }
 \arguments{
@@ -25,15 +26,17 @@ linearSumAssignment(
 
 \item{adj.w}{Weight matrix for adjusting similarity scores.}
 
-\item{num.cells}{A vector indicating the cell count per spot projected to spots.}
+\item{hot.pvals}{Data frame of hotspot p-values indicating hotspot presence in spots and cell types.}
 
-\item{hot.spts}{Data frame indicating hotspot presence in spots and cell types.}
-
-\item{st.prop}{Estimated proportions for ST spots.}
+\item{st.prop.cnts}{Estimated spot-level counts matrix (rows=spots, cols=cell types).}
 
 \item{partition}{Logical indicating whether to split into sub-modules mapped to spatial positions.}
 
 \item{assay}{Assay to use for SC data. Default: "SCT".}
+
+\item{reduction}{Dimensionality reduction technique to align spatial and single-cell data. Default: cca.}
+
+\item{thresh.cells}{If the number of cells exceeds this threshold, the partitioning strategy is executed automatically. Default: 30000.}
 }
 \value{
 A list of assigned cells corresponding to spots.

@@ -4,12 +4,14 @@
 \alias{adjustScObj}
 \title{adjustScObj}
 \usage{
-adjustScObj(sc.obj, st.prop.cnts, assay = "SCT")
+adjustScObj(sc.obj, st.prop.cnts, assay = "SCT", nfeatures = 3000)
 }
 \arguments{
 \item{sc.obj}{Seurat object of single-cell (SC) data.}
 
 \item{assay}{Assay type to use for SC data normalization. Default: SCT.}
+
+\item{nfeatures}{Number of features used for SC and ST integration analysis. Default: 3000.}
 
 \item{st.prop}{A data.frame containing cell counts for ST data.}
 }

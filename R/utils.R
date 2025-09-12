@@ -91,20 +91,17 @@ binarizeMax <- function(sp.score) {
 prop2counts <- function(st.prop, num.cells) {
     st.prop <- as.matrix(st.prop)
     stopifnot(nrow(st.prop) == length(num.cells))
-
     raw <- sweep(st.prop, 1, num.cells, "*")
     counts <- floor(raw)
-
     remainder <- raw - counts
     need_add <- num.cells - rowSums(counts)
-
+    
     for (i in seq_len(nrow(st.prop))) {
         if (need_add[i] > 0) {
             ord <- order(remainder[i, ], decreasing = TRUE)[1:need_add[i]]
             counts[i, ord] <- counts[i, ord] + 1
         }
     }
-
     rownames(counts) <- rownames(st.prop)
     colnames(counts) <- colnames(st.prop)
     return(counts)

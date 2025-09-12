@@ -11,7 +11,6 @@ checkParams.runMap2SP <- function(argg) {
         is(argg[["sc.obj"]], "Seurat"),
         is.null(argg[["cell.type.column"]]) || is.character(argg[["cell.type.column"]]),
         if (!is.null(argg[["cell.type.markers"]])) is(argg[["cell.type.markers"]], "list") else TRUE,
-        is.character(argg[["cell.type.column"]]),
         is.numeric(argg[["group.size"]]) && argg[["group.size"]] >= 5,
         is.numeric(argg[["knn.spots"]]) && argg[["knn.spots"]] >= 0,
         if (!is.null(argg[["max.cells.in.spot"]])) is.numeric(argg[["max.cells.in.spot"]]) && argg[["max.cells.in.spot"]] > 0 else TRUE,

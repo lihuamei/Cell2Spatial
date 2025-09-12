@@ -75,7 +75,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, assay, reduction, npcs = 30, n.fea
         object.list = ifnb.list,
         normalization.method = normalization.method,
         anchor.features = features,
-        reduction = "rpca",
+        reduction = reduction,
         verbose = verbose
     )
     obj <- IntegrateData(anchorset = anchors, normalization.method = normalization.method, k.weight = 30, verbose = verbose)
@@ -105,7 +105,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, assay, reduction, npcs = 30, n.fea
 #' @param verbose Logical, whether to print progress messages during the process. Default: TRUE.
 #' @return A Seurat object after clustering and UMAP computation.
 
-findClustersForSpData <- function(obj.seu, npcs = 30, res.start = 0.1, res.step = 0.05, assay = "SCT", cap = 20000, verbose = TRUE) {
+findClustersForSpData <- function(obj.seu, npcs = 30, res.start = 0.8, res.step = 0.05, assay = "SCT", cap = 20000, verbose = TRUE) {
     if (assay != "SCT") {
         obj.seu <- obj.seu %>%
             FindVariableFeatures(., nfeatures = 3000, verbose = verbose) %>%
@@ -206,7 +206,7 @@ adjcentScOfSPGlobal <- function(obj, quantile.cut = 0.75) {
         as.data.frame() %>%
         `rownames<-`(rownames(umap.sp))
     adj.df <- as.matrix(adj.df)
-    adj.df[adj.df < 0] <- 0
+    adj.df[adj.df < 0] <- 1e-10
     return(adj.df)
 }
 

@@ -9,8 +9,8 @@ weightSimScore(
   adj.w,
   spot.name,
   cell.names,
-  hot.spts = NULL,
-  p.cut = 0.01
+  hot.pvals = NULL,
+  p.cut = 0.05
 )
 }
 \arguments{
@@ -22,7 +22,9 @@ weightSimScore(
 
 \item{cell.names}{Vector or list of cell type names.}
 
-\item{hot.spts}{A data frame indicating hotspot presence in spots and cell types.}
+\item{hot.pvals}{A data frame of hotspot p-values indicating hotspot presence in spots and cell types.}
+
+\item{Numeric}{p-value cutoff for hotspot significance. Default: 0.01.}
 }
 \value{
 Weighted similarity scores matrix where adjustments are applied based on provided weights and hotspot information.

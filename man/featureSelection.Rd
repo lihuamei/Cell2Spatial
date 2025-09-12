@@ -9,6 +9,7 @@ featureSelection(
   sc.obj,
   n.features = 3000,
   assay = "SCT",
+  reduction = "cca",
   verbose = TRUE
 )
 }
@@ -20,6 +21,8 @@ featureSelection(
 \item{n.features}{Number of features to select for integration. Default: 3000.}
 
 \item{assay}{Assay to use for SC data. Default: "SCT".}
+
+\item{reduction}{Dimensionality reduction technique to align spatial and single-cell data. Default: cca.}
 
 \item{verbose}{Boolean indicating whether to display verbose messages during processing. Default: TRUE.}
 }

@@ -99,7 +99,7 @@ runCell2Spatial <- function(sp.obj,
         knn = knn.spots,
         assay = assay.type
     )
-    # return(st.prop.lst$props)
+    return(st.prop.lst$props)
     sc.obj <- .adjustScObj(sc.obj, st.prop.lst$cnts, assay.type)
 
     println("Weighting the distance between SC and ST data...", verbose = verbose)
@@ -114,7 +114,6 @@ runCell2Spatial <- function(sp.obj,
         reduction,
         dist.based = dist.based
     )
-
     println("Similarity estimation for single cells and spots", verbose = verbose)
     sc.score <- getGsetScore(sc.obj, sc.markers, assay = assay.type, signature.scoring.method)
     sp.score <- sp.score[keep.spots, ]
