@@ -7,13 +7,16 @@
 #' @param cell.type.column Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: NULL.
 #' @param cell.type.markers When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.
 #' @param normalize.method Normalization method for scRNA-seq data. Default: SCTransform.
+#' @param marker.selection Method for selecting cell-type specific markers when `sc.markers = NULL`: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.
 #' @param group.size Specify the marker size for each subset derived from single-cell data. Default: 30.
 #' @param knn.spots Number of nearest neighbors to consider for spot-based deconvolution analysis. When set to 0, neighbors are not used. Default: 5.
+#' @param resolution Specify the resolution for spatial clustering. Default: 0.8.
 #' @param max.cells.in.spot Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set `max.cells.in.spot` to 1.
 #' @param fix.cells.in.spot Fixed number of cells assigned to a spot or not. Default: FALSE.
 #' @param signature.scoring.method Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.
 #' @param hotspot.detection.threshold P-value threshold for determining hot spots of cell types, range from 0 to 1. Default: 1.
-#' @param feature.based Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: 'gene.based'.
+#' @param adjust.deconv Specify the strategy for adjusting deconvolution estimation, indicating whether to incorporate hotspot weights into cellular composition estimation; if enabled, a cleaner spatial architecture may be obtained, with regions corresponding to cell types with low confidence potentially removed. Options: "Permutation" (derives weights from permutation-based significance), "Scales" (rescales hotspot significance within tissue identities), "NONE" (applies no weighting). Default: "Permutation".
+#' @param feature.based Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: gene.based.
 #' @param dist.based Dimensionality reduction basis used for distance weighting, UMAP or TSNE. Default: UMAP.
 #' @param spatial.weight Whether to apply spatial weights to the analysis. Default: FALSE.
 #' @param reduction Dimensionality reduction technique to align spatial and single-cell data. Default: cca.
@@ -33,12 +36,15 @@ runCell2Spatial <- function(sp.obj,
                             cell.type.column = NULL,
                             cell.type.markers = NULL,
                             normalize.method = c("SCTransform", "LogNormalize"),
+                            marker.selection = c("shannon", "wilcox"),
                             group.size = 30,
                             knn.spots = 5,
+                            resolution = 0.8,
                             max.cells.in.spot = 10,
                             fix.cells.in.spot = FALSE,
                             signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
                             hotspot.detection.threshold = 1,
+                            adjust.deconv = c("Scales", "Permutation", "NONE"),
                             feature.based = c("gene.based", "celltype.based"),
                             dist.based = c("UMAP", "TSNE"),
                             spatial.weight = FALSE,
@@ -60,8 +66,9 @@ runCell2Spatial <- function(sp.obj,
     if (length(levels(sc.obj)) > 1 & is.null(cell.type.markers)) {
         println("Finding specific markers across cell types based on SC data", verbose = verbose)
     }
+    select.markers <- match.arg(marker.selection)
     assay.type <- ifelse(match.arg(normalize.method) == "SCTransform", "SCT", "RNA")
-    sc.markers <- selectMakers(sc.obj, cell.type.markers, group.size, assay.type)
+    sc.markers <- selectMakers(sc.obj, cell.type.markers, group.size, assay.type, select.markers)
     sc.obj <- subset(sc.obj, idents = names(sc.markers))
 
     feature.based <- ifelse(length(levels(sc.obj)) == 1, "gene.based", match.arg(feature.based))
@@ -83,23 +90,25 @@ runCell2Spatial <- function(sp.obj,
     num.cells <- inferCellNumbers(sp.obj[, keep.spots], max.cells = max.cells.in.spot, fix.cells.in.spot = fix.cells.in.spot)
 
     println("Clustering of spatial spots")
-    sp.obj <- .findClustersForSpData(obj.seu = sp.obj, assay = assay.type, verbose = FALSE) %>% subset(, cells = keep.spots)
+    sp.obj <- .findClustersForSpData(obj.seu = sp.obj, assay = assay.type, res.start = resolution, verbose = FALSE) %>% subset(, cells = keep.spots)
 
     println("Estimating cellular proportions in each spot and adjusting SC data for mapping", verbose = verbose)
     platform.res <- match.arg(platform.res)
+    adjust.deconv <- match.arg(adjust.deconv)
     st.prop.lst <- .estPropInSpots(
         sp.score,
         max.cells.in.spot,
         platform.res,
+        partition,
         sp.obj = sp.obj,
         sc.obj = sc.obj,
         sc.markers = sc.markers,
         num.cells = num.cells,
         hot.pvals = hot.pvals,
-        knn = knn.spots,
-        assay = assay.type
+        weight = adjust.deconv,
+        assay = assay.type,
+        knn = knn.spots
     )
-    return(st.prop.lst$props)
     sc.obj <- .adjustScObj(sc.obj, st.prop.lst$cnts, assay.type)
 
     println("Weighting the distance between SC and ST data...", verbose = verbose)
@@ -116,7 +125,7 @@ runCell2Spatial <- function(sp.obj,
     )
     println("Similarity estimation for single cells and spots", verbose = verbose)
     sc.score <- getGsetScore(sc.obj, sc.markers, assay = assay.type, signature.scoring.method)
-    sp.score <- sp.score[keep.spots, ]
+    sp.score <- sp.score[keep.spots, , drop = FALSE]
     out.sim <- calcSimlarityDist(sc.obj, sp.obj, sc.score, sp.score, feature.based, sc.markers)
 
     garbageCollection(sp.score, sc.score)
@@ -128,9 +137,10 @@ runCell2Spatial <- function(sp.obj,
         adj.w,
         hot.pvals,
         st.prop.lst$cnts,
+        num.cells,
         partition,
         assay.type,
-	reduction
+        reduction
     )
     sce <- assignSCcords(sp.obj, sc.obj, out.sc, lapply(out.sc, length))
     garbageCollection(sp.obj, sc.obj, out.sim, adj.w, hot.spots, num.cells, out.sc, st.prop.lst, hot.pvals)

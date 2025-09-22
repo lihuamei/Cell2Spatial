@@ -11,10 +11,14 @@ checkParams.runMap2SP <- function(argg) {
         is(argg[["sc.obj"]], "Seurat"),
         is.null(argg[["cell.type.column"]]) || is.character(argg[["cell.type.column"]]),
         if (!is.null(argg[["cell.type.markers"]])) is(argg[["cell.type.markers"]], "list") else TRUE,
+        is.character(argg[["normalize.method"]]),
+        is.character(argg[["marker.selection"]]),
         is.numeric(argg[["group.size"]]) && argg[["group.size"]] >= 5,
+        is.numeric(argg[["resolution"]]) && argg[["resolution"]] >= 0,
         is.numeric(argg[["knn.spots"]]) && argg[["knn.spots"]] >= 0,
         if (!is.null(argg[["max.cells.in.spot"]])) is.numeric(argg[["max.cells.in.spot"]]) && argg[["max.cells.in.spot"]] > 0 else TRUE,
         is.logical(argg[["fix.cells.in.spot"]]),
+        is.character(argg[["adjust.deconv"]]),
         is.character(argg[["signature.scoring.method"]]),
         is.numeric(argg[["hotspot.detection.threshold"]]) && argg[["hotspot.detection.threshold"]] <= 1 && argg[["hotspot.detection.threshold"]] > 0,
         is.character(argg[["feature.based"]]),
@@ -69,24 +73,26 @@ preprocessSeqData <- function(sp.obj, sc.obj, cell.type.column, normalize.method
 #' @param cell.type.markers A list of markers for each cell type. Must be provided if SC data contains only one cell type. Default: NULL.
 #' @param group.size The size of the subsets used to find markers. Default: 100.
 #' @param assay.type Assay type to use for marker finding. Default: RNA.
+#' @param select.markers Strategy for inferring marker genes.
 #' @param verbose Boolean indicating whether to show running messages. Default: TRUE.
 #' @return A list of marker genes for each cell type.
 
-selectMakers <- function(sc.obj, cell.type.markers, group.size, assay.type) {
+selectMakers <- function(sc.obj, cell.type.markers, group.size, assay.type, select.markers) {
     if (length(levels(sc.obj)) == 1 && is.null(cell.type.markers)) {
         println("When the SC data contains only one cell type, the marker genes for that cell type must be provided", status = "ERROR")
     }
     if (is.null(cell.type.markers)) {
-        sc.markers <- findScMarkers(sc.obj, group.size)
+        sc.markers <- .findScMarkers(select.markers, sc.obj = sc.obj, group.size = group.size, assay = assay.type)
     } else {
         bl.status <- identical(names(cell.type.markers) %>% sort(), levels(sc.obj) %>% sort())
         if (!bl.status) {
             println("Specified marker list of cell types does not match the identifiers of SC data", status = "WARN")
-            sc.markers <- findScMarkers(sc.obj, group.size, assay = assay.type)
+            sc.markers <- .findScMarkers(select.markers, sc.obj = sc.obj, group.size = group.size, assay = assay.type)
         } else {
             sc.markers <- cell.type.markers
         }
     }
     if (inherits(sc.markers, "character")) sc.markers <- list(XX = sc.markers) %>% `names<-`(levels(sc.obj))
+    sc.markers <- sc.markers[!is.na(sc.markers)]
     return(sc.markers)
 }

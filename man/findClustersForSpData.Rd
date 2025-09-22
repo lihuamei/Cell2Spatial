@@ -7,7 +7,7 @@
 findClustersForSpData(
   obj.seu,
   npcs = 30,
-  res.start = 0.1,
+  res.start = 0.8,
   res.step = 0.05,
   assay = "SCT",
   cap = 20000,
@@ -19,7 +19,7 @@ findClustersForSpData(
 
 \item{npcs}{Number of principal components (PCs) to use for clustering. Default: 30.}
 
-\item{res.start}{Initial resolution parameter for finding clusters. Higher values result in more clusters. Default: 0.1.}
+\item{res.start}{Initial resolution parameter for finding clusters. Higher values result in more clusters. Default: 0.8.}
 
 \item{res.step}{Step size by which the resolution parameter is incremented in each iteration. Default: 0.05.}
 

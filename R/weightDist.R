@@ -64,6 +64,9 @@ integDataBySeurat <- function(sp.obj, sc.obj, assay, reduction, npcs = 30, n.fea
     normalization.method <- ifelse(assay == "SCT", "SCT", "LogNormalize")
     ifnb.list <- list(SC = sc.obj, ST = sp.obj)
     features <- SelectIntegrationFeatures(object.list = ifnb.list, nfeatures = n.features, verbose = verbose)
+    if (assay == "SCT") {
+        ifnb.list <- PrepSCTIntegration(object.list = ifnb.list, anchor.features = features, verbose = verbose)
+    }
     if (reduction == "rpca") {
         ifnb.list <- lapply(ifnb.list, function(obj) {
             obj <- ScaleData(obj, features = features, verbose = verbose)
@@ -86,7 +89,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, assay, reduction, npcs = 30, n.fea
             obj <- RunUMAP(obj, reduction = "pca", dims = 1:npcs, reduction.key = "UMAP_", verbose = verbose)
         },
         TSNE = {
-            obj <- RunTSNE(obj, reduction = "pca", dims = 1:npcs, reduction.key = "UMAP_", verbose = verbose)
+            obj <- RunTSNE(obj, reduction = "pca", dims = 1:npcs, reduction.key = "UMAP_", check_duplicates = FALSE, verbose = verbose)
         }
     )
     return(obj)
@@ -98,7 +101,7 @@ integDataBySeurat <- function(sp.obj, sc.obj, assay, reduction, npcs = 30, n.fea
 #'
 #' @param obj.seu A Seurat object containing the spatial transcriptomics (ST) data.
 #' @param npcs Number of principal components (PCs) to use for clustering. Default: 30.
-#' @param res.start Initial resolution parameter for finding clusters. Higher values result in more clusters. Default: 0.1.
+#' @param res.start Initial resolution parameter for finding clusters. Higher values result in more clusters. Default: 0.8.
 #' @param res.step Step size by which the resolution parameter is incremented in each iteration. Default: 0.05.
 #' @param assay The assay to use for the analysis. Default: "SCT" (Seurat’s SCTransform).
 #' @param cap The maximum allowed number of cells in a cluster. The clustering resolution will adjust to ensure no cluster exceeds this cap. Default: 20000.

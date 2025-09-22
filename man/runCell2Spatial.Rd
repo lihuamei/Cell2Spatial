@@ -10,12 +10,15 @@ runCell2Spatial(
   cell.type.column = NULL,
   cell.type.markers = NULL,
   normalize.method = c("SCTransform", "LogNormalize"),
+  marker.selection.method = c("shannon", "wilcox"),
   group.size = 30,
   knn.spots = 5,
+  resolution = 0.8,
   max.cells.in.spot = 10,
   fix.cells.in.spot = FALSE,
   signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
   hotspot.detection.threshold = 1,
+  adjust.deconv = c("Scales", "Permutation", "NONE"),
   feature.based = c("gene.based", "celltype.based"),
   dist.based = c("UMAP", "TSNE"),
   spatial.weight = FALSE,
@@ -37,9 +40,13 @@ runCell2Spatial(
 
 \item{normalize.method}{Normalization method for scRNA-seq data. Default: SCTransform.}
 
+\item{marker.selection.method}{Method for selecting cell-type specific markers when \code{sc.markers = NULL}: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.}
+
 \item{group.size}{Specify the marker size for each subset derived from single-cell data. Default: 30.}
 
 \item{knn.spots}{Number of nearest neighbors to consider for spot-based deconvolution analysis. When set to 0, neighbors are not used. Default: 5.}
+
+\item{resolution}{Specify the resolution for spatial clustering. Default: 0.8.}
 
 \item{max.cells.in.spot}{Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set \code{max.cells.in.spot} to 1.}
 
@@ -49,7 +56,9 @@ runCell2Spatial(
 
 \item{hotspot.detection.threshold}{P-value threshold for determining hot spots of cell types, range from 0 to 1. Default: 1.}
 
-\item{feature.based}{Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: 'gene.based'.}
+\item{adjust.deconv}{Specify the strategy for adjusting deconvolution estimation, indicating whether to incorporate hotspot weights into cellular composition estimation; if enabled, a cleaner spatial architecture may be obtained, with regions corresponding to cell types with low confidence potentially removed. Options: "Permutation" (derives weights from permutation-based significance), "Scales" (rescales hotspot significance within tissue identities), "NONE" (applies no weighting). Default: "Permutation".}
+
+\item{feature.based}{Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: gene.based.}
 
 \item{dist.based}{Dimensionality reduction basis used for distance weighting, UMAP or TSNE. Default: UMAP.}
 

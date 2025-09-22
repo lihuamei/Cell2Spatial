@@ -4,10 +4,10 @@
 \alias{println}
 \title{println}
 \usage{
-println(X, verbose = TRUE, status = c("INFO", "ERROR", "WARN"), ...)
+println(X, ..., verbose = TRUE, status = c("INFO", "WARN", "ERROR"))
 }
 \arguments{
-\item{verbose}{Bool value, print out message or not, default: TRUE.}
+\item{verbose}{Bool value, print out message or not. Default: TRUE.}
 
 \item{status}{Normal running messages, warn, or error. Default: INFO (normal status).}
 

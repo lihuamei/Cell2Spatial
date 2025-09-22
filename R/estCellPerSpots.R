@@ -18,7 +18,7 @@ inferCellNumbers <- function(sp.obj, max.cells = 10, umi.thresh = 1, w.L = 0.5, 
     if (!("Spatial" %in% names(sp.obj@assays))) stop("Seurat object must contain a 'Spatial' assay.")
 
     if (fix.cells.in.spot) {
-        pred.cnt <- rep(max.cells.in.spot, ncol(sp.obj)) %>% `names<-`(colnames(sp.obj))
+        pred.cnt <- rep(max.cells, ncol(sp.obj)) %>% `names<-`(colnames(sp.obj))
         return(pred.cnt)
     }
     if (max.cells == 1) {
@@ -89,9 +89,12 @@ inferCellNumbers <- function(sp.obj, max.cells = 10, umi.thresh = 1, w.L = 0.5, 
 #' @return Adjusted Seurat object of SC data.
 
 adjustScObj <- function(sc.obj, st.prop.cnts, assay = "SCT", nfeatures = 3000) {
-    ctype.cnt <- colSums(st.prop.cnts)[colSums(st.prop.cnts) > 0]
+    if (!inherits(st.prop.cnts, "numeric")) {
+        ctype.cnt <- colSums(st.prop.cnts)[colSums(st.prop.cnts) > 0]
+    } else {
+        ctype.cnt <- st.prop.cnts
+    }
     sc.idents <- Idents(sc.obj)
-
     counts.all <- GetAssayData(sc.obj, slot = "counts") # 默认 assay
     sys.list <- future.apply::future_lapply(names(ctype.cnt), function(xx) {
         cells.of.type <- names(sc.idents)[sc.idents == xx]

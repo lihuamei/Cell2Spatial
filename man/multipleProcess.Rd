@@ -4,10 +4,14 @@
 \alias{multipleProcess}
 \title{multipleProcess}
 \usage{
-multipleProcess(n.workers = 4)
+multipleProcess(n.workers = 4, max.size = 128 * 1024^3, use.multicore = TRUE)
 }
 \arguments{
 \item{n.workers}{Number of cores. Default: 4.}
+
+\item{max.size}{Maximum allowed size (in bytes) of global variables.}
+
+\item{use.multicore}{Logical, use multicore backend if available. Default: TRUE.}
 }
 \description{
 Open multiple workers for Seurat processing.

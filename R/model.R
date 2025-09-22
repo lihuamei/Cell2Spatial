@@ -36,40 +36,6 @@ weightSimScore <- function(out.sim, adj.w, spot.name, cell.names, hot.pvals = NU
     return(out.sim.w)
 }
 
-#' @title adjustNetProb
-#'
-#' @description Adjusts FNN predictions based on cell type proportions derived from SC and ST data, considering hotspot information.
-#'
-#' @param netx.pred Matrix or data frame of network predictions.
-#' @param sc.obj Seurat object of SC data.
-#' @param sp.obj Seurat object of ST data.
-#' @param hot.pvals A data frame of hotspot p-values indicating hotspot presence in spots and cell types.
-#' @param p.cut Numeric p-value cutoff to call hotspots. Default: 0.05.
-#' @return Adjusted network predictions matrix where weights are applied based on cell type proportions and hotspot information.
-
-adjustNetProb <- function(netx.pred, sc.obj, sp.obj, hot.pvals, p.cut = 0.05) {
-    hot.bool <- hot.pvals <= p.cut
-    hot.spts.new <- cbind.data.frame(hot.bool, CLUSTER = Idents(sp.obj)[rownames(hot.bool)])
-    cluster.summary <- hot.spts.new %>%
-        pivot_longer(cols = -CLUSTER, names_to = "Cell_Type", values_to = "Count") %>%
-        group_by(CLUSTER, Cell_Type) %>%
-        summarize(Total_Count = sum(Count)) %>%
-        pivot_wider(names_from = Cell_Type, values_from = Total_Count, values_fill = 0) %>%
-        as.data.frame() %>%
-        `rownames<-`(.[, 1]) %>%
-        .[, -1, drop = FALSE] %>%
-        sweep(., 2, colSums(.), "/") %>%
-        t()
-    cluster.summary[is.na(cluster.summary)] <- 0
-    sc.types <- Idents(sc.obj) %>%
-        as.vector() %>%
-        `names<-`(colnames(sc.obj))
-    weight.mat <- cluster.summary[sc.types[rownames(netx.pred)], colnames(netx.pred)]
-    netx.pred.new <- netx.pred * weight.mat + 1 / nrow(cluster.summary)
-    netx.pred.new <- sweep(netx.pred.new, 1, rowSums(netx.pred.new), "/")
-    return(netx.pred.new)
-}
-
 #' @title selectByProb
 #'
 #' @description Computes a similarity score matrix based on spatial and single-cell signature scores, adjusting for probabilities.
@@ -134,10 +100,6 @@ calcSimlarityDist <- function(sc.obj, sp.obj, sc.score, sp.score, feature.based,
 #' @return A list containing integrated Seurat objects for SC (`sc.int`) and ST (`st.int`) data.
 
 featureSelection <- function(sp.obj, sc.obj, n.features = 3000, assay = "SCT", reduction = "cca", verbose = TRUE) {
-    if (assay == "RNA") {
-        DefaultAssay(sc.obj) <- "RNA"
-        DefaultAssay(sp.obj) <- "Spatial"
-    }
     ifnb.list <- list(SC = sc.obj, ST = sp.obj)
     features <- SelectIntegrationFeatures(object.list = ifnb.list, nfeatures = n.features, verbose = verbose)
     sc.st.anchors <- Seurat::FindTransferAnchors(
@@ -152,7 +114,7 @@ featureSelection <- function(sp.obj, sc.obj, n.features = 3000, assay = "SCT", r
     st.data.trans <- Seurat::TransferData(
         anchorset = sc.st.anchors,
         refdata = GetAssayData(sc.obj, assay = assay, slot = "data")[features, ],
-        weight.reduction = reduction,
+        weight.reduction = ifelse(reduction == "cca", "cca", "pcaproject"),
         verbose = verbose
     )
     sp.obj@assays$transfer <- st.data.trans
@@ -190,7 +152,7 @@ getClusterCellCounts <- function(st.prop.cnts, sp.obj) {
         spots <- colnames(sp.obj)[Idents(sp.obj) == cls]
         cnts.sum <-
             {
-                st.prop.cnts[spots, ]
+                st.prop.cnts[spots, , drop = FALSE]
             } %>%
             colSums()
         return(cnts.sum)
@@ -236,8 +198,7 @@ partitionClusters <- function(sp.obj, sc.obj, hot.pvals, st.prop.cnts, assay = "
         as.matrix()
     target.cls.counts <- getClusterCellCounts(st.prop.cnts, sp.obj)
     cell.types <- Idents(sc.obj)[rownames(netx.pred)] %>% as.vector()
-    netx.pred.adj <- adjustNetProb(netx.pred, sc.obj, sp.obj, hot.pvals)
-    assigned.lst <- assignCellsGreedyClusters(netx.pred.adj, cell.types, target.cls.counts)$assigned_cluster
+    assigned.lst <- assignCellsGreedyClusters(netx.pred, cell.types, target.cls.counts)$assigned_cluster
     return(assigned.lst)
 }
 
@@ -251,6 +212,7 @@ partitionClusters <- function(sp.obj, sc.obj, hot.pvals, st.prop.cnts, assay = "
 #' @param adj.w Weight matrix for adjusting similarity scores.
 #' @param hot.pvals Data frame of hotspot p-values indicating hotspot presence in spots and cell types.
 #' @param st.prop.cnts Estimated spot-level counts matrix (rows=spots, cols=cell types).
+#' @param num.cells A vector of cell counts for each spot.
 #' @param partition Logical indicating whether to split into sub-modules mapped to spatial positions.
 #' @param assay Assay to use for SC data. Default: "SCT".
 #' @param reduction Dimensionality reduction technique to align spatial and single-cell data. Default: cca.
@@ -258,7 +220,7 @@ partitionClusters <- function(sp.obj, sc.obj, hot.pvals, st.prop.cnts, assay = "
 #' @return A list of assigned cells corresponding to spots.
 #' @export linearSumAssignment
 
-linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, hot.pvals, st.prop.cnts, partition, assay, reduction, thresh.cells = 30000) {
+linearSumAssignment <- function(sp.obj, sc.obj, out.sim, adj.w, hot.pvals, st.prop.cnts, num.cells, partition, assay, reduction, thresh.cells = 30000) {
     if (partition) {
         index.lst <- partitionClusters(sp.obj, sc.obj, hot.pvals, st.prop.cnts, assay, reduction)
     } else {

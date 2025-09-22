@@ -4,7 +4,7 @@
 \alias{selectMakers}
 \title{selectMakers}
 \usage{
-selectMakers(sc.obj, cell.type.markers, group.size, assay.type)
+selectMakers(sc.obj, cell.type.markers, group.size, assay.type, select.markers)
 }
 \arguments{
 \item{sc.obj}{Seurat object containing SC data.}
@@ -14,6 +14,8 @@ selectMakers(sc.obj, cell.type.markers, group.size, assay.type)
 \item{group.size}{The size of the subsets used to find markers. Default: 100.}
 
 \item{assay.type}{Assay type to use for marker finding. Default: RNA.}
+
+\item{select.markers}{Strategy for inferring marker genes.}
 
 \item{verbose}{Boolean indicating whether to show running messages. Default: TRUE.}
 }

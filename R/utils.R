@@ -4,16 +4,21 @@
 #'
 #' @param infos Message that need to be printed.
 #' @param status Normal running messages, warn, or error. Default: INFO (normal status).
-#' @param verbose Bool value, print out message or not, default: TRUE.
+#' @param verbose Bool value, print out message or not. Default: TRUE.
 #' @return NULL.
 
-println <- function(X, verbose = TRUE, status = c("INFO", "ERROR", "WARN"), ...) {
+println <- function(X, ..., verbose = TRUE, status = c("INFO", "WARN", "ERROR")) {
     status <- match.arg(status)
-    infos <- do.call(sprintf, c(list(X, ...))) %>% paste0("[", status, "] ", .)
+    msg <- sprintf(X, ...)
+    msg <- paste0("[", status, "] ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), " - ", msg)
+
     if (verbose || status == "ERROR") {
-        cat(paste0(infos, "\n"))
-        if (status == "ERROR") stop()
+        cat(msg, "\n")
+        if (status == "ERROR") {
+            stop(msg, call. = FALSE)
+        }
     }
+    invisible(NULL)
 }
 
 #' @title multipleProcess
@@ -21,11 +26,21 @@ println <- function(X, verbose = TRUE, status = c("INFO", "ERROR", "WARN"), ...)
 #' @description Open multiple workers for Seurat processing.
 #'
 #' @param n.workers Number of cores. Default: 4.
+#' @param max.size Maximum allowed size (in bytes) of global variables.
+#' @param use.multicore Logical, use multicore backend if available. Default: TRUE.
 #' @return NULL
 
-multipleProcess <- function(n.workers = 4) {
-    options(future.globals.maxSize = 200000 * 1024^2, future.seed = TRUE)
-    future::plan("multicore", workers = n.workers)
+multipleProcess <- function(n.workers = 4, max.size = 128 * 1024^3, use.multicore = TRUE) {
+    if (is.null(n.workers)) {
+        n.workers <- parallel::detectCores()
+    }
+    options(future.globals.maxSize = max.size, future.seed = TRUE)
+    if (use.multicore && .Platform$OS.type == "unix") {
+        future::plan("multicore", workers = n.workers)
+    } else {
+        future::plan("multisession", workers = n.workers)
+    }
+    invisible(NULL)
 }
 
 #' @title garbageCollection
@@ -95,7 +110,7 @@ prop2counts <- function(st.prop, num.cells) {
     counts <- floor(raw)
     remainder <- raw - counts
     need_add <- num.cells - rowSums(counts)
-    
+
     for (i in seq_len(nrow(st.prop))) {
         if (need_add[i] > 0) {
             ord <- order(remainder[i, ], decreasing = TRUE)[1:need_add[i]]
@@ -107,6 +122,27 @@ prop2counts <- function(st.prop, num.cells) {
     return(counts)
 }
 
+#' @title roundCountsUseProp
+#'
+#' @description Round proportional cell type counts so that the total matches the observed number of cells.
+#'
+#' @param st.prop A matrix or data.frame of cell type proportions per spot. Columns correspond to cell types.
+#' @param num.cells A numeric vector of observed cell counts per spot, used to determine the target total number of cells.
+#' @return A named integer vector of rounded cell type counts, whose sum equals the sum of `num.cells`.
+
+roundCountsUseProp <- function(st.prop, num.cells) {
+    target.total <- sum(num.cells)
+    counts.raw <- colSums(st.prop)
+    counts.prop <- counts.raw / sum(counts.raw) * target.total
+    counts.floor <- floor(counts.prop)
+
+    remainder <- target.total - sum(counts.floor)
+    if (remainder > 0) {
+        order.frac <- order(counts.prop - counts.floor, decreasing = TRUE)
+        counts.floor[order.frac[seq_len(remainder)]] <- counts.floor[order.frac[seq_len(remainder)]] + 1
+    }
+    return(counts.floor)
+}
 
 #' @title createSpatialObject
 #'
