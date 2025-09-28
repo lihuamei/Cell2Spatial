@@ -44,7 +44,6 @@ estPropInSpots <- function(sp.obj, sc.obj, sc.markers, num.cells = NULL, hot.pva
     } else {
         w.mat <- matrix(TRUE, ncol = length(sc.markers), nrow = levels(sp.obj) %>% length(), dimnames = list(levels(sp.obj), names(sc.markers)))
     }
-    print(w.mat)
     colnames(base.ref) <- paste0("X", colnames(base.ref))
     spot.prop <- future.apply::future_lapply(tar.spots, function(spot) {
         dist.mat <- dist.lst[[Idents(sp.obj)[spot]]]
