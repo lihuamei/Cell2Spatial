@@ -10,7 +10,7 @@
 #' @param marker.selection Method for selecting cell-type specific markers when `sc.markers = NULL`: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package, or expression fold changes (logFC). Default: shannon.
 #' @param group.size Specify the marker size for each subset derived from single-cell data. Default: 30.
 #' @param knn.spots Number of nearest neighbors to consider for spot-based deconvolution analysis. When set to 0, neighbors are not used. Default: 5.
-#' @param resolution Specify the resolution for spatial clustering. Default: 0.8.
+#' @param resolution Specify the resolution for spatial clustering. Default: 0.2.
 #' @param max.cells.in.spot Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set `max.cells.in.spot` to 1.
 #' @param fix.cells.in.spot Fixed number of cells assigned to a spot or not. Default: FALSE.
 #' @param signature.scoring.method Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.
@@ -39,7 +39,7 @@ runCell2Spatial <- function(sp.obj,
                             marker.selection = c("shannon", "wilcox", "logFC"),
                             group.size = 30,
                             knn.spots = 5,
-                            resolution = 0.8,
+                            resolution = 0.2,
                             max.cells.in.spot = 10,
                             fix.cells.in.spot = FALSE,
                             signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
