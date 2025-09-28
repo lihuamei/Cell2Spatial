@@ -86,7 +86,7 @@ sp.obj <- createSpatialObject(counts, coord.df, coord.label = c("x", "y"), meta.
 # coord.df: Data frame of spot coordinates, with row names representing spot barcodes.
 # coord.label: Specify the coordinates informative column names keep in coord.df data.frame.
 ```
-- Assign single cells to spatial spots by setting `max.cells.in.spot = 1`. For example, apply this to **mouse cerebellum Slide-seq2 data** (https://singlecell.broadinstitute.org/single_cell/study/SCP948).
+- Assign single cells to spatial spots by setting `max.cells.in.spot = 1` or `platform.res = High`. For example, apply this to **mouse cerebellum Slide-seq2 data** (https://singlecell.broadinstitute.org/single_cell/study/SCP948).
 
 ```r
 sc.obj <- readRDS("your_path/cerebellum_SC.RDS")
@@ -98,7 +98,10 @@ SpatialPlot(sce, group.by = 'Cell2Spatial', pt.size.factor = 1.0, stroke = NA)
         <img src="vignette_files/cerebellum.jpg" alt="Resized Image" width="500">
 </p>
 
-## 7. Session infos
+## 7. Structured Spatial Transcriptomics (ST) and the corresponding single-cell data can be accessed from the following site.
+- https://drive.google.com/file/d/13D9k1rb47XA7MBbpEcTgwxAlCXNEvdn-/view?usp=drive_link 
+
+## 8. Session infos
 ```r
 > sessionInfo()
 R version 4.4.1 (2024-06-14)
