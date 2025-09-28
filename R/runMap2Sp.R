@@ -7,7 +7,7 @@
 #' @param cell.type.column Specify the column name for the cell type in the meta.data slot of the SC Seurat object. Default: NULL.
 #' @param cell.type.markers When the number of cell types identified from SC data is one, markers specific to that cell type must be provided. Default: NULL.
 #' @param normalize.method Normalization method for scRNA-seq data. Default: SCTransform.
-#' @param marker.selection Method for selecting cell-type specific markers when `sc.markers = NULL`: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.
+#' @param marker.selection Method for selecting cell-type specific markers when `sc.markers = NULL`: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package, or expression fold changes (logFC). Default: shannon.
 #' @param group.size Specify the marker size for each subset derived from single-cell data. Default: 30.
 #' @param knn.spots Number of nearest neighbors to consider for spot-based deconvolution analysis. When set to 0, neighbors are not used. Default: 5.
 #' @param resolution Specify the resolution for spatial clustering. Default: 0.8.
@@ -15,7 +15,7 @@
 #' @param fix.cells.in.spot Fixed number of cells assigned to a spot or not. Default: FALSE.
 #' @param signature.scoring.method Method for scoring the signature of cell types in ST data: AddModuleScore, UCell, or AverageExpr. Default: AddModuleScore.
 #' @param hotspot.detection.threshold P-value threshold for determining hot spots of cell types, range from 0 to 1. Default: 1.
-#' @param adjust.deconv Specify the strategy for adjusting deconvolution estimation, indicating whether to incorporate hotspot weights into cellular composition estimation; if enabled, a cleaner spatial architecture may be obtained, with regions corresponding to cell types with low confidence potentially removed. Options: "Permutation" (derives weights from permutation-based significance), "Scales" (rescales hotspot significance within tissue identities), "NONE" (applies no weighting). Default: "Permutation".
+#' @param adjust.deconv Specify the strategy for adjusting deconvolution estimation, indicating whether to incorporate hotspot weights into cellular composition estimation; if enabled, a cleaner spatial architecture may be obtained, with regions corresponding to cell types with low confidence potentially removed. Options: "Scales" (rescales hotspot significance within tissue identities), "NONE" (applies no weighting). Default: "Scales".
 #' @param feature.based Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: gene.based.
 #' @param dist.based Dimensionality reduction basis used for distance weighting, UMAP or TSNE. Default: UMAP.
 #' @param spatial.weight Whether to apply spatial weights to the analysis. Default: FALSE.
@@ -30,13 +30,13 @@
 #' @examples
 #' sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") %>% readRDS(.)
 #' sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") %>% readRDS(.)
-#' sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", group.size = 30, fix.cells.in.spot = TRUE)
+#' sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", group.size = 30, fix.cells.in.spot = TRUE, partition = TRUE)
 runCell2Spatial <- function(sp.obj,
                             sc.obj,
                             cell.type.column = NULL,
                             cell.type.markers = NULL,
                             normalize.method = c("SCTransform", "LogNormalize"),
-                            marker.selection = c("shannon", "wilcox"),
+                            marker.selection = c("shannon", "wilcox", "logFC"),
                             group.size = 30,
                             knn.spots = 5,
                             resolution = 0.8,
@@ -44,7 +44,7 @@ runCell2Spatial <- function(sp.obj,
                             fix.cells.in.spot = FALSE,
                             signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
                             hotspot.detection.threshold = 1,
-                            adjust.deconv = c("Scales", "Permutation", "NONE"),
+                            adjust.deconv = c("Scales", "NONE"),
                             feature.based = c("gene.based", "celltype.based"),
                             dist.based = c("UMAP", "TSNE"),
                             spatial.weight = FALSE,

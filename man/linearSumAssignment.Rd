@@ -11,6 +11,7 @@ linearSumAssignment(
   adj.w,
   hot.pvals,
   st.prop.cnts,
+  num.cells,
   partition,
   assay,
   reduction,
@@ -29,6 +30,8 @@ linearSumAssignment(
 \item{hot.pvals}{Data frame of hotspot p-values indicating hotspot presence in spots and cell types.}
 
 \item{st.prop.cnts}{Estimated spot-level counts matrix (rows=spots, cols=cell types).}
+
+\item{num.cells}{A vector of cell counts for each spot.}
 
 \item{partition}{Logical indicating whether to split into sub-modules mapped to spatial positions.}
 

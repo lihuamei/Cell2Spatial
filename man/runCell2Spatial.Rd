@@ -10,7 +10,7 @@ runCell2Spatial(
   cell.type.column = NULL,
   cell.type.markers = NULL,
   normalize.method = c("SCTransform", "LogNormalize"),
-  marker.selection.method = c("shannon", "wilcox"),
+  marker.selection = c("shannon", "wilcox", "logFC"),
   group.size = 30,
   knn.spots = 5,
   resolution = 0.8,
@@ -18,7 +18,7 @@ runCell2Spatial(
   fix.cells.in.spot = FALSE,
   signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
   hotspot.detection.threshold = 1,
-  adjust.deconv = c("Scales", "Permutation", "NONE"),
+  adjust.deconv = c("Scales", "NONE"),
   feature.based = c("gene.based", "celltype.based"),
   dist.based = c("UMAP", "TSNE"),
   spatial.weight = FALSE,
@@ -40,7 +40,7 @@ runCell2Spatial(
 
 \item{normalize.method}{Normalization method for scRNA-seq data. Default: SCTransform.}
 
-\item{marker.selection.method}{Method for selecting cell-type specific markers when \code{sc.markers = NULL}: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package. Default: shannon.}
+\item{marker.selection}{Method for selecting cell-type specific markers when \code{sc.markers = NULL}: modified Shannon-entropy strategy (shannon) or Wilcoxon test (wilcox) implemented by the Seurat package, or expression fold changes (logFC). Default: shannon.}
 
 \item{group.size}{Specify the marker size for each subset derived from single-cell data. Default: 30.}
 
@@ -56,7 +56,7 @@ runCell2Spatial(
 
 \item{hotspot.detection.threshold}{P-value threshold for determining hot spots of cell types, range from 0 to 1. Default: 1.}
 
-\item{adjust.deconv}{Specify the strategy for adjusting deconvolution estimation, indicating whether to incorporate hotspot weights into cellular composition estimation; if enabled, a cleaner spatial architecture may be obtained, with regions corresponding to cell types with low confidence potentially removed. Options: "Permutation" (derives weights from permutation-based significance), "Scales" (rescales hotspot significance within tissue identities), "NONE" (applies no weighting). Default: "Permutation".}
+\item{adjust.deconv}{Specify the strategy for adjusting deconvolution estimation, indicating whether to incorporate hotspot weights into cellular composition estimation; if enabled, a cleaner spatial architecture may be obtained, with regions corresponding to cell types with low confidence potentially removed. Options: "Scales" (rescales hotspot significance within tissue identities), "NONE" (applies no weighting). Default: "Scales".}
 
 \item{feature.based}{Specify whether features for likelihood or correlation calculations between single cells and spots are based on gene expression ('gene.based') or signature scores of cell types ('celltype.based'). Default: gene.based.}
 
@@ -83,5 +83,5 @@ Accurate mapping of single cells to spatial coordinates.
 \examples{
 sp.obj <- system.file("data", "Kindney_SP.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
 sc.obj <- system.file("data", "Kindney_SC.RDS", package = "Cell2Spatial") \%>\% readRDS(.)
-sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", group.size = 30, fix.cells.in.spot = TRUE)
+sce <- runCell2Spatial(sp.obj, sc.obj, cell.type.column = "mainCtype", group.size = 30, fix.cells.in.spot = TRUE, partition = TRUE)
 }

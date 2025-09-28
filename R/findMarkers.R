@@ -163,24 +163,53 @@ findMarkersBySeurat <- function(sc.obj, group.size, assay = "RNA", verbose = FAL
         } %>%
         .[lapply(., length) > 0]
 
-    keep.ct <- intersect(levels(sc.obj), unique(group.ctype))
-    sc.markers <- lapply(keep.ct, function(ct) {
-        score.df.sub <- subset(score.df, cluster == ct)
-        score.df.sub <- score.df.sub[cv.bool.df[score.df.sub$gene, ct], ]
+    return(sc.markers)
+}
+
+#' @title findMarkersByLogFC
+#'
+#' @description Find markers among cell types using average expression fold changes.
+#'
+#' @param sc.obj Seurat object of single-cell data.
+#' @param group.size Marker size of each subset derived from SC data.
+#' @param assay Assay type to use for SC data normalization. Default: RNA.
+#' @param percent.cut Minimum fraction of cells in a cluster expressing a gene. Default: 0.25.
+#' @return A list of identified markers.
+#' @export findMarkersByLogFC
+
+findMarkersByLogFC <- function(sc.obj, group.size, assay = "RNA", percent.cut = 0.25) {
+    X <-
+        {
+            AverageExpression(sc.obj, assay = assay)[[assay]] + 1e-2
+        } %>% as.matrix()
+    group.ctype <- apply(X, 1, which.max) %>%
+        colnames(X)[.] %>%
+        as.vector() %>%
+        `names<-`(rownames(X))
+
+    keep.ct <- levels(sc.obj)
+    q.index <- qualityGenesIndex(sc.obj, assay = assay)
+    sc.markers <- future.apply::future_lapply(keep.ct, function(ct) {
+        score.df.sub <- cbind.data.frame(
+            logFC = q.index$log2FC[, ct],
+            percent = q.index$Percent.In[, ct],
+            mu.in = q.index$Mu.In[, ct],
+            gene = rownames(q.index$log2FC),
+            cluster = group.ctype[rownames(q.index$log2FC)]
+        ) %>% subset(percent >= percent.cut & mu.in >= quantile(.$mu.in, 0.25) & cluster == ct)
         if (length(score.df.sub) == 0) {
             return(NULL)
         }
         score.df.sub %>%
-            arrange(desc(Score)) %>%
+            arrange(desc(logFC)) %>%
             {
                 .$gene[1:min(nrow(.), group.size)]
             }
-    }) %>%
+    }, future.seed = TRUE) %>%
         `names<-`(keep.ct) %>%
         .[lapply(., length) > 0]
     return(sc.markers)
 }
-
 
 .findScMarkers <- function(select.markers, ...) {
     switch(select.markers,
@@ -189,6 +218,9 @@ findMarkersBySeurat <- function(sc.obj, group.size, assay = "RNA", verbose = FAL
         },
         shannon = {
             sc.markers <- findScMarkersByShannon(...)
+        },
+        logFC = {
+            sc.markers <- findMarkersByLogFC(...)
         }
     )
     return(sc.markers)

@@ -2,10 +2,12 @@
 
 export(dectHotSpotsByGetisOrdGi)
 export(downSamplSeurat)
+export(findMarkersByLogFC)
 export(findMarkersBySeurat)
 export(findScMarkersByShannon)
 export(getGsetScore)
 export(inferCellNumbers)
 export(linearSumAssignment)
 export(partitionClusters)
+export(recoverSpatialExpr)
 export(runCell2Spatial)

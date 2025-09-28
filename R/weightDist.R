@@ -189,10 +189,10 @@ adjcentScOfSP <- function(obj) {
 #' @description Generating distance matrix between ST spots and SC cells.
 #'
 #' @param obj Integrated Seurat object.
-#' @param quantile.cut Numeric value specifying the quantile threshold for distance scaling. Default is 0.75, which considers the maximum distance for normalization.
+#' @param quantile.cut Numeric value specifying the quantile threshold for distance scaling. Default is 0.30, which considers the maximum distance for normalization.
 #' @return A matrix of distance weights between ST and SC.
 
-adjcentScOfSPGlobal <- function(obj, quantile.cut = 0.75) {
+adjcentScOfSPGlobal <- function(obj, quantile.cut = 0.30) {
     umap.coord <- FetchData(obj, vars = c("UMAP_1", "UMAP_2", "Batches"))
     umap.sp <- subset(umap.coord, Batches == "ST")[, 1:2]
     umap.sc <- subset(umap.coord, Batches == "SC")[, 1:2]
