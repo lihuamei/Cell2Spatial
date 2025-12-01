@@ -229,3 +229,6 @@ loaded via a namespace (and not attached):
 
 ## 9. Contact us
 Please feel free to contact us at the following email address: li_hua_mei@163.com.
+
+### 10. Citation
+Li, H., Liu, J., Wang, G., Liu, Z., Cao, M., Sun, L., ... & Xiong, Q. (2025). Cell2Spatial is a computational framework that maps single cells to spatial transcriptomic spots to reconstruct tissue architecture. PLoS biology, 23(11), e3003477.
