@@ -13,7 +13,7 @@ runCell2Spatial(
   marker.selection = c("shannon", "wilcox", "logFC"),
   group.size = 30,
   knn.spots = 5,
-  resolution = 0.8,
+  resolution = 0.2,
   max.cells.in.spot = 10,
   fix.cells.in.spot = FALSE,
   signature.scoring.method = c("AddModuleScore", "UCell", "AverageExpr"),
@@ -46,7 +46,7 @@ runCell2Spatial(
 
 \item{knn.spots}{Number of nearest neighbors to consider for spot-based deconvolution analysis. When set to 0, neighbors are not used. Default: 5.}
 
-\item{resolution}{Specify the resolution for spatial clustering. Default: 0.8.}
+\item{resolution}{Specify the resolution for spatial clustering. Default: 0.2.}
 
 \item{max.cells.in.spot}{Maximum number of cells in ST spots. Default: 10 (for 10x Visium). For high-resolution ST data (such as Image-based ST technology), set \code{max.cells.in.spot} to 1.}
 

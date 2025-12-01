@@ -153,6 +153,7 @@ roundCountsUseProp <- function(st.prop, num.cells) {
 #' @param meta.data A data frame containing metadata to be added to the Seurat object. Default: NULL.
 #' @param class Class name of the Spatial image slot. Default: SlideSeq.
 #' @return A Seurat object for ST data.
+#' @export createSpatialObject
 
 createSpatialObject <- function(counts, coord.df, coord.label = c("x", "y"), meta.data = NULL, class = "SlideSeq") {
     ovp.spots <- intersect(colnames(counts), rownames(coord.df))
